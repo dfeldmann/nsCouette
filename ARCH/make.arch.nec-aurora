@@ -1,0 +1,37 @@
+#Intel compilers (compiler suite 13.1 or later is recommended)
+# and Intel MKL (MKL 11.1 or later)
+
+###############################################
+#Intel compiler
+###############################################
+MPIFC = mpinfort
+FFLAGS = -fopenmp -fpp -O3
+DEBUGFLAGS = -g -debug -traceback
+
+CC = ncc 
+CFLAGS = -fopenmp
+
+RPATH=-Xlinker -rpath
+PPPRE=-Wp,
+PPSEP=,
+
+###############################################
+#BLAS, LAPACK from Intel MKL
+###############################################
+LIBLA = -L$(NLC_HOME)/lib/ -llapack -lblas_sequential 
+
+
+###############################################
+#FFTs from the NEC NLC
+###############################################
+LIBFFT = -L$(NLC_HOME)/lib -laslfftw3 -lasl_sequential  
+INCFFT = $(NLC_HOME)/include
+
+
+###############################################
+#MPI-parallel HDF5
+###############################################
+ifneq ($(HDF5IO),no)
+	LIBHDF5 = -L$(HDF5_HOME)/lib -lhdf5_fortran -lhdf5 -lz $(RPATH)=$(HDF5_HOME)/lib
+	INCLUDES = -I$(HDF5_HOME)/include
+endif

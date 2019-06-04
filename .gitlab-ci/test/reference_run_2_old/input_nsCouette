@@ -1,0 +1,41 @@
+&parameters_grid
+m_r   = 32                 ! radial points           => m_r      grid points (radial)
+m_th  = 384                ! azimuthal Fourier modes => 2*m_th+1 grid points (azimuthal)
+m_z0  = 320                ! axial Fourier modes     => 2*m_z0+1 grid points (axial)
+k_th0 = 1.0                ! azimuthal wavenumber    => L_th = 2*pi/k_th0 azimuthal length of grid
+k_z0  = 3.1415926535897931 ! axial wavenumber        => L_z =  2*pi/k_z0  axial length of grid
+eta   = 0.5                ! aspect ratio => r_i = eta/(1-eta),r_o = 1/(1-eta) inner/outer radius
+/
+
+&parameters_physics
+Re_i = 111.1            ! Re_i
+Re_o = 0d0              ! Re_o
+Gr   = 280              ! Gr
+Pr   = 15               ! Pr
+gap  = 3.25d0           ! gap size in cm                          [TE_CODE only]
+gra  = 980              ! gravitational acceleration in g/cm**3   [TE_CODE only]
+nu   = 1.01d-2          ! kinematic viscosity in cm**2 /s         [TE_CODE only]
+/
+
+&parameters_timestep
+numsteps    = 100       ! number of steps 
+init_dt     = 1.0d-4    ! initial size of timestep
+variable_dt = T         ! use a variable (=T) or fixed (=F) timestep
+maxdt       = 0.01      ! maximum size of timestep
+Courant     = 0.25      ! CFL safety factor
+/
+
+&parameters_output
+fBase_ic = 'REF_2'      ! identifier for coeff_ (checkpoint) and fields_ (hdf5) files 
+dn_coeff = 5000         ! output interval [steps] for coeff (dn_coeff = -1 disables ouput)
+dn_ke    = 10           ! output interval [steps] for energy
+dn_vel   = 10           ! output interval [steps] for velocity
+dn_Nu    = 10           ! output interval [steps] for Nusselt (torque)
+dn_hdf5  = 1000         ! output interval [steps] for HDF5 output
+print_time_screen = 10  ! output interval [steps] for timestep info to stdout 
+/
+
+&parameters_control
+restart = 0		! initialization mode: 0=new run, 1=restart from checkpoint
+runtime = 7200          ! maximum runtime [s] for the job
+/

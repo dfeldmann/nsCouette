@@ -1,0 +1,57 @@
+<CustomFilterDefinitions>
+  <CustomProxyDefinition name="swapTransformCylCartCoord" group="filters">
+    <CompoundSourceProxy id="4535" servers="1">
+      <Proxy group="filters" type="ProgrammableFilter" id="3083" servers="1" compound_name="ProgrammableFilter2">
+        <Property name="CopyArrays" id="3083.CopyArrays" number_of_elements="1">
+          <Element index="0" value="1"/>
+          <Domain name="bool" id="3083.CopyArrays.bool"/>
+        </Property>
+        <Property name="InformationScript" id="3083.InformationScript" number_of_elements="1">
+          <Element index="0" value=""/>
+        </Property>
+        <Property name="Input" id="3083.Input" number_of_elements="1">
+          <Domain name="groups" id="3083.Input.groups"/>
+          <Domain name="input_type" id="3083.Input.input_type"/>
+        </Property>
+        <Property name="OutputDataSetType" id="3083.OutputDataSetType" number_of_elements="1">
+          <Element index="0" value="8"/>
+          <Domain name="enum" id="3083.OutputDataSetType.enum">
+            <Entry value="8" text="Same as Input"/>
+            <Entry value="0" text="vtkPolyData"/>
+            <Entry value="2" text="vtkStructuredGrid"/>
+            <Entry value="3" text="vtkRectilinearGrid"/>
+            <Entry value="4" text="vtkUnstructuredGrid"/>
+            <Entry value="6" text="vtkImageData"/>
+            <Entry value="10" text="vtkUniformGrid"/>
+            <Entry value="13" text="vtkMultiblockDataSet"/>
+            <Entry value="15" text="vtkHierarchicalBoxDataSet"/>
+            <Entry value="19" text="vtkTable"/>
+          </Domain>
+        </Property>
+        <Property name="PythonPath" id="3083.PythonPath" number_of_elements="1">
+          <Element index="0" value=""/>
+        </Property>
+        <Property name="Script" id="3083.Script" number_of_elements="1">
+          <Element index="0" value="from paraview import vtk&#xa;import math&#xa;&#xa;pdi = self.GetInput()&#xa;pdo =  self.GetOutput()&#xa;newPoints = vtk.vtkPoints()&#xa;numPoints = pdi.GetNumberOfPoints()&#xa;for i in range(0, numPoints):&#xa;&#x9;coord = pdi.GetPoint(i)&#xa;&#x9;r1, th1, z1 = coord[:3]&#xa;&#x9;r =  z1&#xa;&#x9;th = r1&#xa;&#x9;z = th1&#xa;&#x9;x = r * cos(th)&#xa;&#x9;y = r * sin(th)&#xa;&#x9;newPoints.InsertPoint(i, x, y, z)&#xa;pdo.SetPoints(newPoints)"/>
+        </Property>
+        <Property name="UpdateExtentScript" id="3083.UpdateExtentScript" number_of_elements="1">
+          <Element index="0" value=""/>
+        </Property>
+      </Proxy>
+      <ExposedProperties>
+        <Property name="CopyArrays" proxy_name="ProgrammableFilter2" exposed_name="Copy Arrays"/>
+        <Property name="Input" proxy_name="ProgrammableFilter2" exposed_name="Input"/>
+        <Property name="OutputDataSetType" proxy_name="ProgrammableFilter2" exposed_name="Output Data Set Type"/>
+        <Property name="Parameters" proxy_name="ProgrammableFilter2" exposed_name="Parameters"/>
+        <Property name="PythonPath" proxy_name="ProgrammableFilter2" exposed_name="Python Path"/>
+        <Property name="InformationScript" proxy_name="ProgrammableFilter2" exposed_name="RequestInformation Script"/>
+        <Property name="UpdateExtentScript" proxy_name="ProgrammableFilter2" exposed_name="RequestUpdateExtent Script"/>
+        <Property name="Script" proxy_name="ProgrammableFilter2" exposed_name="Script"/>
+      </ExposedProperties>
+      <OutputPort name="Output" proxy="ProgrammableFilter2" port_index="0"/>
+      <Hints>
+        <ShowInMenu/>
+      </Hints>
+    </CompoundSourceProxy>
+  </CustomProxyDefinition>
+</CustomFilterDefinitions>

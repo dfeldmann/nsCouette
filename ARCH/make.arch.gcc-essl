@@ -1,0 +1,38 @@
+###############################################
+#RZG modules
+###############################################
+
+###############################################
+#GNU Compilers and MPI wrappers
+###############################################
+MPIFC = /opt/ibm/spectrum_mpi/bin/mpifort
+
+export OMPI_FC=gfortran
+export OMPI_CC=gcc
+
+FFLAGS = -fopenmp -cpp -O3 -mtune=native -mcpu=native
+CC = gcc
+CFLAGS = -fopenmp
+
+RPATH=-Wl,-rpath
+PPPRE=-Wp,
+PPSEP=,
+
+#BLAS, LAPACK from IBM ESSL
+LIBLA = -lessl 
+DEFINES += $(PPSEP)-DWITHESSL$(PPSEP)-D__XLF__
+
+#FFTs from system
+#LIBFFT = -lfftw3 -lfftw3_omp
+#INCFFT = /usr/include
+
+#FFTs from a generic FFTW
+LIBFFT = -L$(FFTW_HOME)/lib -lfftw3_omp -lfftw3 
+###-lm $(RPATH)=$(FFTW_HOME)/lib
+INCFFT = $(FFTW_HOME)/include
+
+
+ifneq ($(HDF5IO),no)
+	LIBHDF5 = -L$(HDF5_HOME)/lib -lhdf5_fortran -lhdf5 -lz $(RPATH)=$(HDF5_HOME)/lib
+	INCLUDES = -I$(HDF5_HOME)/include
+endif

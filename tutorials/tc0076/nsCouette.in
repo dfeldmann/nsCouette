@@ -1,0 +1,69 @@
+&parameters_grid
+m_r   = 48                 ! N radial points           => m_r      grid points (radial)
+m_th  = 32                 ! M azimuthal Fourier modes => 2*m_th+1 grid points (azimuthal)
+m_z0  = 32                 ! L axial Fourier modes     => 2*m_z0+1 grid points (axial)
+k_th0 = 1.0d0              ! azimuthal wavenumber      => L_th = 2*pi/k_th0 azimuthal length of grid
+k_z0  = 0.84d0             ! axial wavenumber          => L_z  = 2*pi/k_z0  = 7.48 axial length of grid
+eta   = 0.5d0              ! aspect ratio => r_i = eta/(1-eta),r_o = 1/(1-eta) inner/outer radius
+/
+
+&parameters_physics
+Re_i = 50.0d0           ! inner cylinder Reynolds number
+Re_o =  0.0d0           ! outer cylinder Reynolds number
+Gr   = 5000.0d0         ! Gr = Ra/Pr
+Pr   = 0.71d0           ! Pr
+gap  = 3.25d0           ! gap size in cm                          [TE_CODE only]
+gra  = 980              ! gravitational acceleration in g/cm**3   [TE_CODE only]
+nu   = 1.01d-2          ! kinematic viscosity in cm**2 /s         [TE_CODE only]
+/
+
+&parameters_timestep
+numsteps    = 300000    ! number of computational time steps 
+init_dt     = 1.0d-6    ! initial size of time step
+variable_dt = T         ! use a variable (=T) or fixed (=F) time step size
+maxdt       = 1.0d-3    ! maximum size of time step
+Courant     = 0.25      ! CFL safety factor
+/
+
+&parameters_output
+fBase_ic  = 'tc0076'    ! identifier for coeff_ (checkpoint) and fields_ (hdf5) files 
+dn_coeff  = 300000      ! output interval [steps] for coeff (dn_coeff = -1 disables ouput)
+dn_ke     = 10          ! output interval [steps] for energy
+dn_vel    = 10          ! output interval [steps] for velocity
+dn_Nu     = 10          ! output interval [steps] for Nusselt (torque)
+dn_hdf5   = 300000      ! output interval [steps] for HDF5 output
+dn_prbs   = 10          ! output interval [steps] for time series data at probe locations
+prl_r(1)  = 0.20d0      ! radial probe locations (0 < r/d < 1)
+prl_r(2)  = 0.50d0
+prl_r(3)  = 0.80d0
+prl_r(4)  = 0.20d0
+prl_r(5)  = 0.50d0
+prl_r(6)  = 0.80d0
+prl_th(1) = 0.25d0      ! azimuthal probe locations (0 < th/L_th < 1)
+prl_th(2) = 0.25d0
+prl_th(3) = 0.25d0
+prl_th(4) = 0.75d0     
+prl_th(5) = 0.75d0     
+prl_th(6) = 0.75d0
+prl_z(1)  = 0.25d0      ! axial probe locations (0 < z/L_z < 1)
+prl_z(2)  = 0.25d0
+prl_z(3)  = 0.25d0
+prl_z(4)  = 0.75d0
+prl_z(5)  = 0.75d0
+prl_z(6)  = 0.75d0
+print_time_screen = 1000 ! output interval [steps] for timestep info to stdout
+/
+
+&parameters_control
+restart = 1             ! initialization mode: 0=new run, 1=restart from checkpoint (keep time),2=restart from checkpoint (set time=0 and create new output files)  
+runtime = 86400         ! maximum runtime [s] for the job
+/
+
+&parameters_initialcondition
+ic_tcbf    = T                ! Set Taylor-Couette base flow (T) or resting fluid (F), only when restart = 0
+ic_temp    = T                ! Set temperature profile (T) or zero (F), only when restart = 0, only TE_CODE
+ic_pert    = T                ! Add perturbation on top of base flow (T) or not (F), only when restart = 0
+ic_p(1, :) = 1.0d-2, 0, 2     ! 1st perturbation: amplitude and wavevector (a1, k_th1, k_z1)
+ic_p(2, :) = 1.0d-2, 3, 0     ! 2nd perturbation: amplitude and wavevector (a2, k_th2, k_z2)
+/
+

@@ -1,0 +1,41 @@
+#GCC compilers (compiler suite 4.7 or later is recommended)
+# and OpenBLAS (0.2.13 or later)
+
+#adapt the MPI compiler wrappers!
+
+###############################################
+#GNU compiler (gcc 4.7 or later is recommended)
+###############################################
+MPIFC = mpigfortran 
+FFLAGS = -fopenmp -cpp -O3 -mtune=native
+DEBUGFLAGS = -g -Wall -fcheck=all -finit-real=snan -ffpe-trap=invalid,zero,overflow --coverage
+
+CC = gcc
+CFLAGS = -fopenmp 
+
+RPATH=-Wl,-rpath
+PPPRE=-Wp,
+PPSEP=,
+
+
+###############################################
+#BLAS, LAPACK from OpenBLAS (www.openblas.net)
+###############################################
+LIBLA = -L$(OPENBLAS_HOME)/lib -lopenblas $(RPATH)=$(OPENBLAS_HOME)/lib
+# make sure that the serial (and not the multithreaded!)
+#  BLAS and LAPACK routines are used
+
+
+###############################################
+#FFTs from FFTW 
+###############################################
+LIBFFT = -L$(FFTW_HOME)/lib -lfftw3 -lfftw3_omp -lm $(RPATH)=$(FFTW_HOME)/lib
+INCFFT = $(FFTW_HOME)/include
+
+###############################################
+#MPI-parallel HDF5
+###############################################
+ifneq ($(HDF5IO),no)
+	LIBHDF5 = -L$(HDF5_HOME)/lib -lhdf5_fortran -lhdf5 -lz $(RPATH)=$(HDF5_HOME)/lib
+	INCLUDES = -I$(HDF5_HOME)/include
+endif
