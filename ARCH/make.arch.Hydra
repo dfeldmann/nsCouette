@@ -1,0 +1,34 @@
+###############################################
+#RZG modules
+###############################################
+MKLROOT=$(MKL_HOME)
+
+###############################################
+#Intel Compilers and MPI wrappers
+###############################################
+MPIFC = mpiifort
+FFLAGS = -openmp -fpp -O3 -xHost -fp-model source -mcmodel medium -shared-intel
+CC = icc 
+CFLAGS = -openmp -mcmodel medium -shared-intel
+
+RPATH=-Xlinker -rpath
+PPPRE=-Wp,
+PPSEP=,
+
+#BLAS, LAPACK from Intel MKL
+LIBLA = -L$(MKLROOT)/lib/intel64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm $(RPATH)=$(MKLROOT)/lib/intel64
+DEFINES += $(PPSEP)-DWITHMKL
+
+#FFTs from MKL (using MKL's FFTW wrappers)
+LIBFFT =
+INCFFT = $(MKLROOT)/include/fftw
+
+##FFTs from a generic FFTW
+#LIBFFT = -L$(FFTW_HOME)/lib -lfftw3_omp -lfftw3 -lm $(RPATH)=$(FFTW_HOME)/lib
+#INCFFT = $(FFTW_HOME)/include
+
+
+ifneq ($(HDF5IO),no)
+	LIBHDF5 = -L$(HDF5_HOME)/lib -lhdf5_fortran -lhdf5 -lz $(RPATH)=$(HDF5_HOME)/lib
+	INCLUDES = -I$(HDF5_HOME)/include
+endif

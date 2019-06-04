@@ -1,0 +1,18 @@
+&PARAMETERS_RESTART
+ I_TIME  =       0,
+ TIME    =  0.500000000000218     ,
+ DT      =  1.000000000000000E-006,
+ M_R_IFILE       =          32,
+ M_TH_IFILE      =          16,
+ M_Z_IFILE       =          32,
+ FBASE_IC        = "WSPEED"                                  
+ /
+ &PARAMETERS_INFO
+ K_TH0_IFILE     =   6.00000000000000     ,
+ K_Z0_IFILE      =   2.61799387799149     ,
+ ETA_IFILE       =  0.868000000000000     ,
+ GIT_IFILE       = "unknown"                                ,
+ ARCH_IFILE      = "unknown"       ,
+ CMP_IFILE       = "unknown"                             
+               
+ /

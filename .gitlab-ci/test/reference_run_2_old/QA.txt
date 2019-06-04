@@ -1,0 +1,45 @@
+--------------
+mjr 2018-04-10
+
+this is a justification for updating .gitlab-ci/test/reference_run_2/ 
+which was computed using code version e977d448
+
+after commit 20fd5bb7 on master CI keeps causing (putative) false positives 
+with intel > 15 compilers
+
+
+=>
+rerun .gitlab-ci/test/reference_run_2/ with different compilers and compare results using
+numdiff -S ...../Nusselt
+check:
+Largest relative error in the set of relevant numerical differences:
+XXXXXX
+
+
+rerun 20fd5bb7:
+
+          intel-16             intel-17
+intel-15  5.2349742575e-8      5.0685145982e-8
+intel-16                       2.5212352177e-8
+
+
+
+rerun 3f060942:
+
+          intel-16             intel-17
+intel-15  5.2349742575e-8      5.0685145982e-8
+intel-16                       2.5212352177e-8
+
+
+CI_ref := .gitlab-ci/test/reference_run_2/ (until 3f060942)
+
+
+          20fd5bb7 vs. 3f060942     3f060942 vs. CI_ref  20fd5bb7 vs. CI_ref
+intel-15  0.0000000000e+0           0.0000000000e+0      0.0000000000e+0
+intel-16  0.0000000000e+0           5.2349742575e-8      5.2349742575e-8
+intel-17  0.0000000000e+0           5.0685145982e-8      5.0685145982e-8
+
+=> deviations are consistent
+=> versions 20fd5bb7 (last 'good' reference) and 3f060942 produce equal results
+=> replace CI_ref with 20fd5bb7 results, recomputed with intel-16
+

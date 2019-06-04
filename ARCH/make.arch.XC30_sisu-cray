@@ -1,0 +1,59 @@
+#Intel compilers (compiler suite 13.1 or later is recommended)
+# and Intel MKL (MKL 11.1 or later)
+
+# CRAY XC30 sisu.csc.fi
+# module load PrgEnv-cray
+# export PE_LIBSCI_OMP_REQUIRES_openmp=
+# export PE_LIBSCI_DEFAULT_OMP_REQUIRES_openmp=
+# (deselects threaded libsci)
+
+###############################################
+#CRAY compiler with CRAY wrappers
+###############################################
+MPIFC = ftn
+FFLAGS = -e F -O3 -dynamic 
+#-h noomp
+CC = cc 
+CFLAGS = -O3
+
+RPATH=-Wl,-rpath
+PPPRE=-Wp,
+PPSEP=,
+
+################################################
+##BLAS, LAPACK from Cray libsci
+################################################
+#LIBLA = 
+##-L$(MKLROOT)/lib/intel64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm $(RPATH)=$(MKLROOT)/lib/intel64
+#DEFINES +=
+##$(PPSEP)-DWITHMKL
+#
+#
+################################################
+##FFTs from FFTW3
+################################################
+#LIBFFT = -L$(FFTW_DIR) -lfftw3 -lm $(RPATH)=$(FFTW_DIR)
+#INCFFT = $(FFTW_INC)
+
+###############################################
+#BLAS, LAPACK from Intel MKL
+###############################################
+LIBLA = -L$(MKLROOT)/lib/intel64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm $(RPATH)=$(MKLROOT)/lib/intel64
+DEFINES +=$(PPSEP)-DWITHMKL
+
+
+###############################################
+#FFTs from MKL (using MKL's FFTW wrappers)
+###############################################
+#FFTs from MKL (using MKL's FFTW wrappers)
+LIBFFT =
+INCFFT = $(MKLROOT)/include/fftw
+
+
+###############################################
+#MPI-parallel HDF5
+###############################################
+ifneq ($(HDF5IO),no)
+	LIBHDF5 = -L$(HDF5_HOME)/lib -lhdf5_fortran -lhdf5 -lz $(RPATH)=$(HDF5_HOME)/lib
+	INCLUDES = -I$(HDF5_HOME)/include
+endif
