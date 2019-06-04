@@ -1,0 +1,104 @@
+\documentclass[11pt,a4paper]{article}
+
+%----------------------------------------------------
+\usepackage{graphicx,amsmath,amssymb}
+\usepackage{fancyhdr}
+%\usepackage{subfig}
+\usepackage{paralist}
+\usepackage{caption}
+\captionsetup{font=small,labelsep= period}
+\graphicspath{{../../figures/}}
+\usepackage[a4paper,top=3cm,bottom=3.5cm,left=2cm,right=2cm]{geometry}
+%\usepackage{hyperref}
+\usepackage{epsfig}
+
+\title{Some notes about nsPipeflow}
+\author
+{
+  Jose M. Lopez, Liang Shi, Markus Rampp, Bj\"orn Hof \& Marc Avila\\
+  }
+  \date{\today}
+
+%--------------------------------------------------------
+\begin{document}
+
+\maketitle
+
+%\newpage
+
+
+\noindent The code \verb+nsPipeflow+ merges the numerical formulation
+of Openpipeflow [1], an open source code to simulate pipe flow,
+with the hybrid parallel strategy of nsCouette [2], a HPC
+code for DNS of Taylor-Couette flow, creating a highly scalable solver
+to simulate pipe flow at large values of the Reynolds number. For details
+about the equations and numerical methods please read the documentation
+of Openpipeflow (http://www.openpipeflow.org/index.php?title=Manual).
+From a user perspective \verb+nsPipeflow+ works in the same way as \verb+nsCouette+,
+and so the reader is encouraged to read in detail its documentation
+(https://gitlab.rzg.mpg.de/mjr/nscouette/) before using \verb+nsPipeflow+. Here,
+we will only briefly discuss some I/O parameters or operations that have been
+modified with respect to \verb+nsCouette+.
+
+\section{Input file: input\_nsPipeflow}
+
+The input file \verb+input_nsPipeflow+ is the only file that
+the user needs to modify to perform simulations with
+\verb+nsPipeflow+. The only difference with respect to the
+input file in \verb+nsCouette+ (\verb+input_nsCouette+)
+are the physical parameters, which are naturally those specific
+for pipe flow. There are two physical parameters in
+\verb+input_nsPipeflow+. The Reynolds number (\verb+Re+), based on the centreline
+velocity of the laminar flow and the pipe radius, and a logical
+variable \verb+const_flux+ that controls whether the fluid motion along
+the pipe is driven by a constant pressure gradient (\verb+const_flux=F+)
+or a constant mass flux (\verb+const_flux=T+).
+
+\section{Initial perturbation}
+
+When the initilization option \verb+restart=0+ is chosen,
+the simulation is started from the base flow (Hagen-Poiseuille),
+which is perturbed during the initialization phase. The
+disturbances added to the base flow are implemented in the subroutine
+pulse\_init contained in mod\_InOut.f90. By default,
+\verb+nsPipeflow+ implements a pair of streamwise localized
+rolls ($v=A(g+rg') cos(\theta) e^{-wsin^2(\pi z/L_z)}$ and
+$u=A g sin(\theta) e^{-wsin^2(\pi z/L_z)}$, where $u$ and $v$ are the
+radial and azimuthal velocity components, $L_z$ is the pipe axial length,
+$r$,$\theta$ and $z$ are the three spatial directions in cylindrical
+coordinates, $w$ fixes the axial length of the perturbation,
+$g=(1-r^2)^2$,  and $A$ is the amplitude of the
+disturbance. This perturbation is known to produce puffs at the
+transitional regime and turbulence at higher Reynolds numbers [3].
+Nevertheless, the user may need to modify $A$ and $w$
+depending on the values of $Re$ and $L_z$ considered in the simulations.
+
+
+\section{Outputs}
+
+\verb+nsPipeflow+ produces the same output files as \verb+nsCouette+,
+with the exception of \verb+torque+ and \verb+vel_mid+. Instead,
+a file \verb+friction+ is generated that contains time series
+for the excess of friction (if a constant flux is set) or bulk velocity
+(if a constant pressure gradient is chosen), the centreline velocity,
+the friction velocity and the friction coefficient. In addition,
+the azimuthally and axially averaged velocity profile is also written
+every time that a checkpoint is saved. 
+
+
+
+\section*{References}
+\begin{enumerate}
+\item Willis, A. P. The Openpipeflow Navier–Stokes solver. SoftwareX 6, 124–127 (2017)
+\item Liang Shi, Markus Rampp, Bj\"orn Hof and Marc Avila, A hybrid MPI-OpenMP parallel implementation for
+  pseudospectral simulations with application to Taylor-Couette
+  flow. Computers \& Fluids 106 (2015) 1-11. (arXiv:1311.2481)
+\item Fernando Mellibowski, Alvaro Meseguer, Tobias M. Schneider and Bruno Eckhardt,
+  Transition in Localized Pipe Flow Turbulence (2009) PRL
+  103,054502 (2009)
+\end{enumerate}
+
+
+
+
+\end{document}

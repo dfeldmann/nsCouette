@@ -1,23 +1,3 @@
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! This file is part of NSCouette, a HPC code for DNS of Taylor-Couette flow !
-!                                                                           !
-! Copyright (C) 2016 Marc Avila, Bjoern Hof, Jose Manuel Lopez,             !
-!                    Markus Rampp, Liang Shi                                !
-!                                                                           !
-! NSCouette is free software: you can redistribute it and/or modify         !
-! it under the terms of the GNU General Public License as published by      !
-! the Free Software Foundation, either version 3 of the License, or         !
-! (at your option) any later version.                                       !
-!                                                                           !
-! NSCouette is distributed in the hope that it will be useful,              !
-! but WITHOUT ANY WARRANTY; without even the implied warranty of            !
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             !
-! GNU General Public License for more details.                              !
-!                                                                           !
-! You should have received a copy of the GNU General Public License         !
-! along with NSCouette.  If not, see <http://www.gnu.org/licenses/>.        !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 !=============================================
 !
 !      A module to compute 
@@ -27,130 +7,175 @@
 !=============================================
 
 MODULE mod_fdInit
-  
   IMPLICIT NONE
-  private
-
-  public :: fd_Matrix
-
+  
 CONTAINS
 
-  !------------------------------------------------------------------
-  SUBROUTINE fd_Matrix(m,n,x,Mw_dx,Mw_dxx,dr1,dr2,intrdr)
-  !--------------------------------------------------------------
-  ! FD weights matrix M such that df = M*f, for arbitrary f(x)
-  ! Input:
-  !      x       Descretized points in x-direction
-  !      n       Length(x)-1
-  !      m       Length(stencil)-1
-  ! Output:
-  !      Mw_dx   Weights matrix for the 1st derivative
-  !      Mw_dxx  Weights matrix for the 2nd derivative
-  !      dr1     Weights to extrapolate to r=r_i
-  !      dr2     Weights to extrapolate to r=r_o
-  !      intrdr  Weights for integration
-  !      Matrices in BLAS-like band storage
-  !--------------------------------------------------------------
 
-    IMPLICIT NONE
+
+
+  SUBROUTINE radial_grid(m,rad)
+
+    !Compute radial points as in Ashleys code.
     
-    INTEGER(KIND=4), INTENT(IN)  :: m,n
-    REAL(KIND=8), INTENT(IN)  :: x(0:n)
-    REAL(KIND=8), INTENT(OUT) :: Mw_dx(0:m,0:n)
-    REAL(KIND=8), INTENT(OUT) :: Mw_dxx(0:m,0:n)
-    REAL(KIND=8), INTENT(OUT) :: dr1(0:m/2,0:m/2),dr2(0:m/2,0:m/2),intrdr(0:n)
-    REAL(KIND=8), ALLOCATABLE :: s(:),c(:,:)
-    INTEGER(KIND=4)           :: i,j,mt,k,iw,left,right
-    REAL(kind=8)              :: e1,e2
-
-    Mw_dx  = 0.0D0
-    Mw_dxx = 0.0D0
-
-
-    iw=m/2
-
-
-    ALLOCATE(s(0:m),c(0:m,0:m))
-    DO i = m/2,n-m/2
-       s = x(i-m/2:i+m/2)
-       CALL fd_Weigths(x(i),s,m,2,c)
-
-
-       do j = i-m/2,i+m/2
-
-          k = iw - j
-          Mw_dx(k+i,j)  = c(j-(i-m/2),1)
-          Mw_dxx(k+i,j) = c(j-(i-m/2),2) 
-           
-
-       end do
-          
-    END DO
-    DEALLOCATE(s,c)
-
-    DO i = 0,m/2-1
-       mt = m/2+i
-       ALLOCATE(s(0:mt),c(0:mt,0:mt))
-
-       s = x(0:mt)
-       CALL fd_Weigths(x(i),s,mt,2,c)
-
+    IMPLICIT NONE 
+    
+    INTEGER(kind=4),intent(in) :: m
+    REAL(kind=8),intent(out) :: rad(m)
+    integer(kind=4) :: n, N_
+    real(kind=8) :: dr
+    REAL(KIND=8)   ,PARAMETER :: PI = ACOS(-1d0) 
+    ! T_{N-1}(x) has N extrema
+    ! Numerical Recipes 5.8.5
+      
+      
+    !Chebyshev collocation points (!zero cannot be a point of the domain)
+    N_ = m+int(sqrt(real(m)))
        
-       do j = 0,mt
-
-          k = iw - j
-          Mw_dx(k+i,j)  = c(j,1)
-          Mw_dxx(k+i,j) = c(j,2) 
-           
-
-       end do
-       s = x(n-mt:n)
-       CALL fd_Weigths(x(n-i),s,mt,2,c)
-
-       do j = n-mt,n
-
-          k = iw - j
-          Mw_dx(k+n-i,j)  = c(j-(n-mt),1)
-          Mw_dxx(k+n-i,j) = c(j-(n-mt),2) 
-           
-
-       end do
-       DEALLOCATE(s,c)
-    END DO
+    do n = N_-m+1, N_
+       rad(n-N_+m) = 0.5d0*( 1d0+dcos(PI*(N_-n)/real(N_)) )
+          
+    end do
+       
+    do n = 1, 10
+       dr = 1.5d0*rad(1)-0.5d0*rad(2)
+       rad(:) = rad(:)*(1d0+dr) - dr
+    end do
         
-    !Compute weights to extrapolate to r_i and r_o                                                                                          
-
-    CALL fd_Weigths(x(0),x(0:m/2),m/2,m/2,dr1)
-    mt = m/2
-    ALLOCATE(s(0:mt),c(0:mt,0:mt))
-    s = x(n-m/2:n)
-    CALL fd_Weigths(x(n),s,mt,mt,c)
-    dr2=c(:,:)
-    DEALLOCATE(s,c)
-
-       ! weights for integration  r dr                                                                                                          
-
-   intrdr = 0d0
-   do i = 0, n
-      left = max(0,i-iw)
-      right = min(i+iw,n)
-      mt = right-left
-      ALLOCATE(s(0:mt),c(0:mt,0:mt))
-      s(0:mt)=x(left:right)
-      CALL fd_Weigths(x(i),s,mt,mt,c)
-      e1 = 1d0
-      e2 = 1d0
-      do j = 0, mt
-         e1 = e1 * (x(min(i+1,n))-x(i)) / dble(j+1)
-         e2 = e2 * (x(max(0,i-1))-x(i)) / dble(j+1)
-         intrdr(left:left+mt) = intrdr(left:left+mt) + 0.5d0*(e1-e2)*c(0:mt,j)*x(i)
-      end do
-      DEALLOCATE(s,c)
-   end do
     
+  end subroutine radial_grid
+                                                                                                                         
 
-    RETURN
-  END SUBROUTINE fd_Matrix
+
+  !------------------------------------------------------------------                         
+  SUBROUTINE fd_Matrix(m,n,x,Mw_dx,Mw_dxx,dr0,dr1,intrdr)                                     
+  !--------------------------------------------------------------                             
+  ! FD weights matrix M such that df = M*f, for arbitrary f(x)                                
+  ! Input:                                                                                    
+  !      x       Descretized points in x-direction                                            
+  !      n       Length(x)-1                                                                  
+  !      m       Length(stencil)-1                                                            
+  ! Output:                                                                                   
+  !      Mw_dx   Weights matrix for the 1st derivative                                        
+  !      Mw_dxx  Weights matrix for the 2nd derivative                                        
+  !      dr0     Weights matrix to extrapolate to r=0                                         
+  !      Matrices in BLAS-like band storage                                                   
+  !--------------------------------------------------------------                             
+                                                                                              
+    IMPLICIT NONE                                                                             
+                                                                                              
+    INTEGER(KIND=4), INTENT(IN)  :: m,n                                                       
+    REAL(KIND=8), INTENT(IN)  :: x(0:n)                                                       
+    REAL(KIND=8), INTENT(OUT) :: Mw_dx(0:m,0:n)                                               
+    REAL(KIND=8), INTENT(OUT) :: Mw_dxx(0:m,0:n)                                              
+    REAL(KIND=8), INTENT(OUT) :: dr0(0:m/2,0:1),dr1(0:m/2,0:1),intrdr(0:n)                    
+    REAL(KIND=8), ALLOCATABLE :: s(:),c(:,:)                                                  
+    INTEGER(KIND=4)           :: i,j,mt,k,iw,left,right                                       
+    REAL(kind=8)              :: e1,e2,r_(-1:n)                                               
+                                                                                              
+    Mw_dx  = 0.0D0                                                                            
+    Mw_dxx = 0.0D0                                                                            
+                                                                                              
+    dr0=0d0                                                                                   
+                                                                                              
+    iw=m/2                                                                                    
+                                                                                              
+                                                                                              
+    ALLOCATE(s(0:m),c(0:m,0:m))                                                               
+    DO i = m/2,n-m/2                                                                          
+       s = x(i-m/2:i+m/2)                                                                     
+       CALL fd_Weigths(x(i),s,m,2,c)                                                          
+                                                                                              
+                                                                                              
+       do j = i-m/2,i+m/2                                                                     
+                                                                                              
+          k = iw - j                                                                          
+          Mw_dx(k+i,j)  = c(j-(i-m/2),1)                                                      
+          Mw_dxx(k+i,j) = c(j-(i-m/2),2)                                                      
+                                                                                              
+                                                                                              
+       end do                                                                                 
+                                                                                              
+    END DO                                                                                    
+    DEALLOCATE(s,c)                                                                           
+                                                                                              
+    DO i = 0,m/2-1                                                                            
+       mt = m/2+i                                                                             
+       ALLOCATE(s(0:mt),c(0:mt,0:mt))                                                         
+                                                                                              
+       s = x(0:mt)                                                                            
+       CALL fd_Weigths(x(i),s,mt,2,c)                                                         
+                                                                                              
+                                                                                              
+       do j = 0,mt                                                                            
+                                                                                              
+          k = iw - j                                                                          
+          Mw_dx(k+i,j)  = c(j,1)                                                              
+          Mw_dxx(k+i,j) = c(j,2)                                                              
+                                                                                              
+                                                                                              
+       end do                                                                                 
+       s = x(n-mt:n)                                                                          
+       CALL fd_Weigths(x(n-i),s,mt,2,c)                                                       
+                                                                                              
+       do j = n-mt,n                                                                          
+                                                                                              
+          k = iw - j                                                                          
+          Mw_dx(k+n-i,j)  = c(j-(n-mt),1)                                                     
+          Mw_dxx(k+n-i,j) = c(j-(n-mt),2)                                                     
+                                                                                              
+                                                                                              
+       end do                                                                                 
+       DEALLOCATE(s,c)                                                                        
+                                                                                              
+    END DO                                                                                    
+                                                                                              
+                                                                                              
+    !Compute weights to extrapolate to r=0 and r=1                                            
+                                                                                              
+   CALL fd_Weigths(0d0,x(0:m/2),m/2,1,dr0)                                                    
+   mt = m/2                                                                                   
+   ALLOCATE(s(0:mt),c(0:mt,0:mt))                                                             
+   s = x(n-m/2:n)                                                                             
+   CALL fd_Weigths(x(n),s,mt,1,c)                                                             
+   dr1=c(:,0:1)                                                                               
+   DEALLOCATE(s,c)                                                                            
+                                                                                              
+                                                                                              
+   !radial points                                                                             
+                                                                                              
+   r_(0:n)=x(0:n)                                                                             
+   r_(-1)= 0d0                                                                                
+                                                                                              
+                                                                                              
+   ! weights for integration  r dr                                                            
+                                                                                              
+   intrdr = 0d0                                                                               
+   do i = 0, n                                                                                
+      left = max(0,i-iw)                                                                      
+      right = min(i+iw,n)                                                                     
+      mt = right-left                                                                         
+      ALLOCATE(s(0:mt),c(0:mt,0:mt))                                                          
+      s(0:mt)=x(left:right)                                                                   
+      CALL fd_Weigths(x(i),s,mt,mt,c)                                                         
+      e1 = 1d0                                                                                
+      e2 = 1d0                                                                                
+      do j = 0, mt                                                                            
+         e1 = e1 * (r_(min(i+1,n))-r_(i)) / real(j+1)                                         
+         e2 = e2 * (r_(max(-1,i-1))-r_(i)) / real(j+1)                                        
+         intrdr(left:left+mt) = intrdr(left:left+mt) + 0.5d0*(e1-e2)*c(0:mt,j)*r_(i)          
+      end do                                                                                  
+      DEALLOCATE(s,c)                                                                         
+   end do                                                                                     
+                                                                                              
+                                                                        
+                                                                                              
+    RETURN                                                                                    
+  END SUBROUTINE fd_Matrix                                                                    
+
+
+
+
 
   !-------------------------------------------------------------------
   SUBROUTINE fd_Weigths(x0,x,n,m,c)
@@ -204,5 +229,5 @@ CONTAINS
     RETURN
   END SUBROUTINE fd_Weigths
 
-!------------------------------------------------------------------
 END MODULE mod_fdInit
+

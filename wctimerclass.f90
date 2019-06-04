@@ -51,8 +51,8 @@
 
       TYPE, PUBLIC :: WCTimer
          LOGICAL      , PRIVATE :: started = .FALSE.,stopped = .FALSE.,initialized= .FALSE.
-         INTEGER, PRIVATE :: startTime = 0
-         INTEGER, PRIVATE :: finishTime = 0
+         REAL(KIND=TP), PRIVATE :: startTime = 0.0_TP
+         REAL(KIND=TP), PRIVATE :: finishTime = 0.0_TP
          INTEGER, PRIVATE :: clock_rate,clock_max
 
 

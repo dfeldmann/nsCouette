@@ -1,0 +1,34 @@
+&parameters_grid
+m_r   = 32                 ! radial points           => m_r      grid points (radial)
+m_th  = 4                 ! azimuthal Fourier modes => 2*m_th+1 grid points (azimuthal)
+m_z0  = 4                 ! axial Fourier modes     => 2*m_z0+1 grid points (axial)
+k_th0 = 1.0d0                ! azimuthal wavenumber    => L_th = 2*pi/k_th0 azimuthal length of grid
+k_z0  = 0.628318531d0 ! axial wavenumber        => L_z =  2*pi/k_z0  axial length of grid
+/
+
+&parameters_physics
+Re = 100d0            ! Re
+const_flux = T           ! T: constant flow rate; F: constant pressure gradient
+/
+
+&parameters_timestep
+numsteps    = 20000     ! number of steps 
+init_dt     = 1.0d-4    ! initial size of timestep
+variable_dt = T         ! use a variable (=T) or fixed (=F) timestep
+maxdt       = 0.01      ! maximum size of timestep
+Courant     = 0.25      ! CFL safety factor
+/
+
+&parameters_output
+fBase_ic = 'DNS1'       ! identifier for coeff_ (checkpoint) and fields_ (hdf5) files 
+dn_coeff = 5000         ! output interval [steps] for coeff (dn_coeff = -1 disables ouput)
+dn_ke    = 100          ! output interval [steps] for energy
+dn_friction    = 100    ! output interval [steps] for friction parameters
+dn_hdf5  = 1000         ! output interval [steps] for HDF5 output
+print_time_screen = 100 ! output interval [steps] for timestep info to stdout   
+/
+
+&parameters_control
+restart = 0		! initialization mode: 0=new run, 1=restart from checkpoint (keep time), 2=restart from checkpoint (set time=0 and create new output files)
+runtime = 86400         ! maximum runtime [s] for the job
+/

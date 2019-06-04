@@ -1,4 +1,3 @@
-// obtain mapping of threads to cores (by F. Thomas, RZG/IBM) 
    #define _GNU_SOURCE
    #include <stdlib.h>
    # include <stdio.h>
@@ -18,7 +17,7 @@
    getProcessorID(cpu_set_t* cpu_set)
    {
        int processorId;
-       for (processorId=0;processorId<256;processorId++)
+       for (processorId=0;processorId<128;processorId++)
        {
            if (CPU_ISSET(processorId,cpu_set))
            {

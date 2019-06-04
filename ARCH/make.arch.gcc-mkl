@@ -3,10 +3,15 @@
 
 #adapt the MPI compiler wrappers!
 
+MKLROOT=/mnt/nfs/clustersw/Debian/stretch/intel2018/mkl/compilers_and_libraries_2018.2.199/linux/mkl
+HDF5_HOME=/mnt/nfs/clustersw/Debian/stretch/hdf5/1.10.2-Intel2018-parallel
+
+
+
 ###############################################
 #GNU compiler
 ###############################################
-MPIFC = mpigfortran
+MPIFC = mpif90
 FFLAGS = -fopenmp -cpp -O3 -mtune=native
 DEBUGFLAGS = -g -Wall -fcheck=all -finit-real=snan -ffpe-trap=invalid,zero,overflow --coverage
 

@@ -124,5 +124,3 @@ pages:
     paths:
       - public
     expire_in: 60 days
-  only:
-      - master

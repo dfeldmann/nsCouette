@@ -1,23 +1,3 @@
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! This file is part of NSCouette, a HPC code for DNS of Taylor-Couette flow !
-!                                                                           !
-! Copyright (C) 2016 Marc Avila, Bjoern Hof, Jose Manuel Lopez,             !
-!                    Markus Rampp, Liang Shi                                !
-!                                                                           !
-! NSCouette is free software: you can redistribute it and/or modify         !
-! it under the terms of the GNU General Public License as published by      !
-! the Free Software Foundation, either version 3 of the License, or         !
-! (at your option) any later version.                                       !
-!                                                                           !
-! NSCouette is distributed in the hope that it will be useful,              !
-! but WITHOUT ANY WARRANTY; without even the implied warranty of            !
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             !
-! GNU General Public License for more details.                              !
-!                                                                           !
-! You should have received a copy of the GNU General Public License         !
-! along with NSCouette.  If not, see <http://www.gnu.org/licenses/>.        !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 !==============================================
 ! Collection of driver routines for writing
 !  HDF5 output and a corresponding XML file
@@ -36,6 +16,7 @@ MODULE mod_hdf5io
   private
   public :: init_io,finalize_io,create_file,close_file,write_hdf,write_xdmf,datafile
 
+  INTEGER :: mpierror       ! MPI error flag
   INTEGER :: mpi_comm,mpi_info,ierr,mpi_size,mpi_rank
 
 
@@ -48,8 +29,7 @@ MODULE mod_hdf5io
 
   interface write_hdf
      
-   ! module procedure write_real, write_int, write_string, write_1dreal, write_3dreal_collective
-     module procedure write_dbl, write_int, write_string, write_1ddbl, write_3ddbl_collective
+     module procedure write_real,write_int,write_string,write_1dreal,write_3dreal_collective
 
   end interface write_hdf
 
@@ -123,7 +103,7 @@ CONTAINS
 
 
 
-  subroutine write_dbl(file,data,dname)
+  subroutine write_real(file,data,dname)
 
     IMPLICIT NONE
 
@@ -133,7 +113,7 @@ CONTAINS
 
     integer :: error
 
-    integer(HID_T) :: attr_id,group_id,dspace_id
+    integer(HID_T) :: filespace,memspace,dset_id,attr_id,group_id,dspace_id
 
 
     group_id = file%current_group
@@ -150,7 +130,7 @@ CONTAINS
     CALL h5sclose_f(dspace_id, error)
 
 
-  end subroutine write_dbl
+  end subroutine write_real
 
   subroutine write_int(file,data,dname)
 
@@ -162,7 +142,7 @@ CONTAINS
 
     integer :: error
 
-    integer(HID_T) :: attr_id,group_id,dspace_id
+    integer(HID_T) :: filespace,memspace,dset_id,attr_id,group_id,dspace_id
 
 
     group_id = file%current_group
@@ -191,7 +171,7 @@ CONTAINS
 
     integer :: error
 
-    integer(HID_T) :: attr_id,group_id,dspace_id,dtype_id
+    integer(HID_T) :: filespace,memspace,dset_id,attr_id,group_id,dspace_id,dtype_id
 
 
     group_id = file%current_group
@@ -215,7 +195,7 @@ CONTAINS
 
   end subroutine write_string
 
-  subroutine write_1ddbl(file,data,dname)
+  subroutine write_1dreal(file,data,dname)
 
     IMPLICIT NONE
 
@@ -226,6 +206,7 @@ CONTAINS
     type(datafile), intent(in) :: file
 
     integer(HSIZE_T) :: dims(rank)
+    integer(HSSIZE_T), DIMENSION(rank) :: offset 
     integer :: error
 
     integer(HID_T) :: filespace,memspace,dset_id,plist_id,group_id
@@ -241,8 +222,8 @@ CONTAINS
     CALL h5screate_simple_f(rank, dims, filespace, error)
 
     ! Create the dataset with default properties.
-  ! CALL h5dcreate_f(group_id, dname, H5T_NATIVE_REAL, filespace, dset_id, error)
-    CALL h5dcreate_f(group_id, dname, H5T_NATIVE_DOUBLE, filespace, dset_id, error)
+    CALL h5dcreate_f(group_id, dname, H5T_NATIVE_REAL, filespace, &
+         dset_id, error)
 
     CALL h5sclose_f(filespace, error)
 
@@ -263,10 +244,8 @@ CONTAINS
     CALL h5pset_dxpl_mpio_f(plist_id, H5FD_MPIO_COLLECTIVE_F, error)
 
     ! Write the dataset collectively. 
-  ! CALL h5dwrite_f(dset_id, H5T_NATIVE_REAL, real(data, kind=4), dims, error, file_space_id = filespace, mem_space_id = memspace, xfer_prp = plist_id)
-    CALL h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, real(data, kind=8), dims, &
-    error, file_space_id = filespace, mem_space_id = memspace, &
-    xfer_prp = plist_id)
+    CALL h5dwrite_f(dset_id, H5T_NATIVE_REAL, real(data,kind=4), dims, error, &
+         file_space_id = filespace, mem_space_id = memspace, xfer_prp = plist_id)
 
     ! Close dataspaces.
     CALL h5sclose_f(filespace, error)
@@ -275,9 +254,9 @@ CONTAINS
     CALL h5dclose_f(dset_id, error)
     CALL h5pclose_f(plist_id, error)
 
-  end subroutine write_1ddbl
+  end subroutine write_1dreal
 
-  subroutine write_3ddbl_collective(file,data,dimsf,dname)
+  subroutine write_3dreal_collective(file,data,dimsf,dname)
 
     IMPLICIT NONE
 
@@ -306,8 +285,8 @@ CONTAINS
     CALL h5screate_simple_f(rank, dimsf, filespace, error)
 
     ! Create the dataset with default properties.
-  ! CALL h5dcreate_f(group_id, dname, H5T_NATIVE_REAL, filespace, dset_id, error)
-    CALL h5dcreate_f(group_id, dname, H5T_NATIVE_DOUBLE, filespace, dset_id, error)
+    CALL h5dcreate_f(group_id, dname, H5T_NATIVE_REAL, filespace, &
+         dset_id, error)
 
     CALL h5sclose_f(filespace, error)
 
@@ -329,10 +308,8 @@ CONTAINS
     CALL h5pset_dxpl_mpio_f(plist_id, H5FD_MPIO_COLLECTIVE_F, error)
 
     ! Write the dataset collectively. 
-  ! CALL h5dwrite_f(dset_id, H5T_NATIVE_REAL, real(data,kind=4), dims, error, file_space_id = filespace, mem_space_id = memspace, xfer_prp = plist_id)
-    CALL h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, real(data, kind=8), dims, &
-    error, file_space_id = filespace, mem_space_id = memspace, &
-    xfer_prp = plist_id)
+    CALL h5dwrite_f(dset_id, H5T_NATIVE_REAL, real(data,kind=4), dims, error, &
+         file_space_id = filespace, mem_space_id = memspace, xfer_prp = plist_id)
 
     ! Close dataspaces.
     CALL h5sclose_f(filespace, error)
@@ -343,7 +320,7 @@ CONTAINS
     CALL h5pclose_f(plist_id, error)
 
 
-  end subroutine write_3ddbl_collective
+  end subroutine write_3dreal_collective
 
 
 
@@ -363,22 +340,22 @@ CONTAINS
     write(lun,'(A,3I6,A)') '<Topology TopologyType="3DRectMesh" Dimensions="',dimsf(3:1:-1),'"/>'
     write(lun,'(A)') '<Geometry GeometryType="VXVYVZ">'
 
-    write(lun,'(A,I6,A)') ' <DataItem Dimensions="',dimsf(1),'" Name="th" NumberType="Float" Precision="8" Format="HDF">'
+    write(lun,'(A,I6,A)') ' <DataItem Dimensions="',dimsf(1),'" Name="th" NumberType="Float" Precision="4" Format="HDF">'
     write(lun,'(3A)') '  ',filename//'.h5',':/grid/th'
     write(lun,'(A)') ' </DataItem>'
 
-    write(lun,'(A,I6,A)') ' <DataItem Dimensions="',dimsf(2),'" Name="z" NumberType="Float" Precision="8" Format="HDF">'
+    write(lun,'(A,I6,A)') ' <DataItem Dimensions="',dimsf(2),'" Name="z" NumberType="Float" Precision="4" Format="HDF">'
     write(lun,'(3A)') '  ',filename//'.h5',':/grid/z'
     write(lun,'(A)') ' </DataItem>'
 
-    write(lun,'(A,I6,A)') ' <DataItem Dimensions="',dimsf(3),'" Name="r" NumberType="Float" Precision="8" Format="HDF">'
+    write(lun,'(A,I6,A)') ' <DataItem Dimensions="',dimsf(3),'" Name="r" NumberType="Float" Precision="4" Format="HDF">'
     write(lun,'(3A)') '  ',filename//'.h5',':/grid/r'
     write(lun,'(A)') ' </DataItem>'
 
     write(lun,'(A)') '</Geometry>'
-    write(lun,'(a, es25.13e3, a)') '<Time Value="', time,'" />'
+    write(lun,'(A,1E11.4,A)') '<Time Value="',time,'" />'
     write(lun,'(A)') '<Attribute Name="pressure" AttributeType="Scalar" Center="Node">'
-    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="8" Format="HDF">'
+    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="4" Format="HDF">'
     write(lun,'(3A)') '  ',filename//'.h5',':/fields/pressure'
     write(lun,'(A)') ' </DataItem>'
     write(lun,'(A)') '</Attribute>'
@@ -386,29 +363,29 @@ CONTAINS
 
 #ifdef TE_CODE
     write(lun,'(A)') '<Attribute Name="temperature" AttributeType="Scalar" Center="Node">'
-    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="8" Format="HDF">'
+    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="4" Format="HDF">'
     write(lun,'(3A)') '  ',filename//'.h5',':/fields/temperature'
     write(lun,'(A)') ' </DataItem>'
     write(lun,'(A)') '</Attribute>'
 #endif /* TE_CODE */
-    
+
     write(lun,'(A)') '<Attribute Name="u_r" AttributeType="Scalar" Center="Node">'
 
-    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="8" Format="HDF">'
+    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="4" Format="HDF">'
     write(lun,'(3A)') '  ',filename//'.h5',':/fields/velocity/u_r'
     write(lun,'(A)') '  </DataItem>'
     write(lun,'(A)') '</Attribute>'
 
     write(lun,'(A)') '<Attribute Name="u_th" AttributeType="Scalar" Center="Node">'
 
-    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="8" Format="HDF">'
+    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="4" Format="HDF">'
     write(lun,'(3A)') '  ',filename//'.h5',':/fields/velocity/u_th'
     write(lun,'(A)') '  </DataItem>'
     write(lun,'(A)') '</Attribute>'
 
     write(lun,'(A)') '<Attribute Name="u_z" AttributeType="Scalar" Center="Node">'
 
-    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="8" Format="HDF">'
+    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="4" Format="HDF">'
     write(lun,'(3A)') '  ',filename//'.h5',':/fields/velocity/u_z'
     write(lun,'(A)') '  </DataItem>'
     write(lun,'(A)') '</Attribute>'
@@ -419,15 +396,15 @@ CONTAINS
     write(lun,'(A)') '<Attribute Name="velocity" AttributeType="Vector" Center="Node">'
     write(lun,'(A,4I6,A)') '<DataItem ItemType="Function" Dimensions="',dimsf(3:1:-1),3,'" Function="JOIN($0 , $1, $2)">'
 
-    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="8" Format="HDF">'
+    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="4" Format="HDF">'
     write(lun,'(3A)') '  ',filename//'.h5',':/fields/velocity/u_r'
     write(lun,'(A)') '  </DataItem>'
 
-    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="8" Format="HDF">'
+    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="4" Format="HDF">'
     write(lun,'(3A)') '  ',filename//'.h5',':/fields/velocity/u_th'
     write(lun,'(A)') '  </DataItem>'
 
-    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="8" Format="HDF">'
+    write(lun,'(A,3I6,A)') '  <DataItem Dimensions="',dimsf(3:1:-1),'" NumberType="Float" Precision="4" Format="HDF">'
     write(lun,'(3A)') '  ',filename//'.h5',':/fields/velocity/u_z'
     write(lun,'(A)') '  </DataItem>'
 

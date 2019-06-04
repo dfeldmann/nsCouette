@@ -6,7 +6,7 @@ HDF5_HOME=/mnt/nfs/clustersw/Debian/stretch/hdf5/1.10.2-Intel2018-parallel
 ###############################################
 #Intel compiler
 ###############################################
-MPIFC = mpif90
+MPIFC = mpiifort
 FFLAGS = -qopenmp -fpp -O3 -xHost -fp-model source -mcmodel medium -shared-intel -align array16byte -heap-arrays 10
 DEBUGFLAGS = -g -debug -traceback -check all,noarg_temp_created -fpe0 -init=arrays -init=snan
 

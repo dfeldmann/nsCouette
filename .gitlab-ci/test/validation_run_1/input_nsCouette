@@ -37,17 +37,4 @@ restart = 1             ! initialization mode: 0=new run, 1=restart from checkpo
 runtime = 7200          ! maximum runtime [s] for the job
 /
 
-&parameters_initialcondition
-ic_tcbf    = F                ! Set Taylor-Couette base flow (T) or resting fluid (F), only when restart = 0
-ic_temp    = F                ! Set temperature profile (T) or zero (F), only when restart = 0, only TE_CODE
-ic_pert    = F                ! Add perturbation on top of base flow (T) or not (F), only when restart = 0
-ic_p(1, :) = 0.0d-0, 0, 0     ! 1st perturbation: amplitude and wavevector (a1, k_th1, k_z1)
-ic_p(2, :) = 0.0d-0, 0, 0     ! 2nd perturbation: amplitude and wavevector (a2, k_th2, k_z2)
-ic_p(2, :) = 0.0d-0, 0, 0     ! 2nd perturbation: amplitude and wavevector (a2, k_th2, k_z2)
-ic_p(3, :) = 0.0d-0, 0, 0     ! 3rd perturbation: amplitude and wavevector (a3, k_th3, k_z3)
-ic_p(4, :) = 0.0d-0, 0, 0     ! 4th perturbation: amplitude and wavevector (a4, k_th4, k_z4)
-ic_p(5, :) = 0.0d-0, 0, 0     ! 5th perturbation: amplitude and wavevector (a5, k_th5, k_z5)
-ic_p(6, :) = 0.0d-0, 0, 0     ! 6th perturbation: amplitude and wavevector (a6, k_th6, k_z6)
-/
-
 

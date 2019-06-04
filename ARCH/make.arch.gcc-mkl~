@@ -1,26 +1,31 @@
-#Intel compilers (compiler suite 13.1 or later is recommended)
-# and Intel MKL (MKL 11.1 or later)
+#GCC compilers (compiler suite 4.7 or later is recommended)
+# and MKL (MKL 11.1 or later)
+
+#adapt the MPI compiler wrappers!
+
+MKLROOT=
+
 
 ###############################################
-#Intel compiler
+#GNU compiler
 ###############################################
-MPIFC = mpiifort
-FFLAGS = -qopenmp -fpp -O3 -xHost -fp-model source -mcmodel medium -shared-intel -align array16byte -heap-arrays 10
-DEBUGFLAGS = -g -debug -traceback -check all,noarg_temp_created -fpe0 -init=arrays -init=snan
+MPIFC = mpif90
+FFLAGS = -fopenmp -cpp -O3 -mtune=native
+DEBUGFLAGS = -g -Wall -fcheck=all -finit-real=snan -ffpe-trap=invalid,zero,overflow --coverage
 
-CC = icc 
-CFLAGS = -qopenmp -mcmodel medium -shared-intel
+CC = gcc
+CFLAGS = -fopenmp 
 
-RPATH=-Xlinker -rpath
+RPATH=-Wl,-rpath
 PPPRE=-Wp,
 PPSEP=,
+
 
 ###############################################
 #BLAS, LAPACK from Intel MKL
 ###############################################
 LIBLA = -L$(MKLROOT)/lib/intel64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm $(RPATH)=$(MKLROOT)/lib/intel64
 DEFINES +=$(PPSEP)-DWITHMKL
-
 
 ###############################################
 #FFTs from MKL (using MKL's FFTW wrappers)
@@ -32,11 +37,9 @@ INCFFT = $(MKLROOT)/include/fftw
 #LIBFFT = -L$(FFTW_HOME)/lib -lfftw3_omp -lfftw3 -lm $(RPATH)=$(FFTW_HOME)/lib
 #INCFFT = $(FFTW_HOME)/include
 
-
 ###############################################
 #MPI-parallel HDF5
 ###############################################
-HDF5_HOME=/home/feldmann/hdf5/hdf5-1.10.0-patch1
 ifneq ($(HDF5IO),no)
 	LIBHDF5 = -L$(HDF5_HOME)/lib -lhdf5_fortran -lhdf5 -lz $(RPATH)=$(HDF5_HOME)/lib
 	INCLUDES = -I$(HDF5_HOME)/include

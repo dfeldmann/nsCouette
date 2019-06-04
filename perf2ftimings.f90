@@ -1,8 +1,5 @@
-! simple wrappers for mapping perflib calls to the ftimings
-! library (by L. Huedepohl, RZG) 
 subroutine perfinit
   use timings
-
   call timer%enable()
 end subroutine perfinit
 
@@ -17,18 +14,16 @@ subroutine perfoff(label)
   use timings
   character(*), intent(in) :: label
 
+!  call timer%stop(trim(adjustl(label)))
   call timer%stop()
 end subroutine perfoff
 
-subroutine perfout(label)
+subroutine perfout()
   use timings
-  character(*), intent(in) :: label
-
   call timer%print()
 end subroutine perfout
 
-subroutine perf_context_start(label)
-  character(*), intent(in) :: label
+subroutine perf_context_start()
 
 end subroutine perf_context_start
 

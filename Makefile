@@ -1,17 +1,9 @@
 ###################################################################################
-# NSCOUETTE by Jose Manuel Lopez (PPE formulation), Liang Shi, et al.
-#
-# Please cite:  
-#   A hybrid MPI-OpenMP parallel implementation for pseudospectral 
-#   simulations with application to Taylor-Couette flow
-#   Shi, L.; Rampp, M.; Hof, B.; Avila, M. 
-#   Computers & Fluids, 106, 1-11 (2015)   
-#   (arXiv:1311.2481) 
+# NSPIPEFLOW by Jose Manuel Lopez, Liang Shi, et al.
 #
 ###################################################################################
 #
 # Makefile for a standard x86_64 Linux software stack with Intel/GNU/PGI compilers:
-#  a number of platform-specific configurations are provided in ARCH/make.arch.*
 #
 # requirements:
 #
@@ -32,7 +24,7 @@
 #
 #  3) BLAS/LAPACK: a serial BLAS/LAPACK library
 #                  (tested with Intel MKL 11.x, OpenBLAS 0.2.14)
-#      -> adapt LIBLA and/or point environment variable $MKLROOT to a MKL installation 
+#      -> adapt LIBLA and/or point environment variable $MKL_ROOT to a MKL installation 
 #
 #      for free software see: 
 #        http://www.openblas.net/
@@ -41,7 +33,7 @@
 #           
 #  4) FFTW: a serial but fully thread-safe fftw3 installation or equivalent 
 #           (tested with fftw 3.3 and MKL 11.1, earlier MKL versions will likely fail)
-#      -> point environment variable $FFTW_HOME to a FFTW3 installation 
+#      -> point environment variable $FFTW_ROOT to a FFTW3 installation 
 #      -> alternative: select  make FFTLIB=MKL (requires MKL 11.1 or later) 
 #
 #      for free software see: 
@@ -49,7 +41,7 @@
 #    
 #  5) HDF5: an MPI-parallel HDF5 library installation
 #           (tested with 1.8.9)
-#      -> point environment variable $HDF5_HOME to an MPI-parallel HDF5 installation 
+#      -> point environment variable $HDF5_ROOT to an MPI-parallel HDF5 installation 
 #      -> alternative: switch data output off with: make HDF5IO=no
 #
 #      for free software see: 
@@ -58,15 +50,20 @@
 #############################################################################
 
 #defaults for external variables 
+
 ARCH     ?= intel-mkl
 CODE     ?= STD_CODE
-HDF5IO   ?= yes
+HDF5IO   ?= no
 PROFLIB  ?= none
 DEBUG    ?= no
 #TESTS    ?= ,-DTEST1,-DTEST2
 
-#platform specific definitions
 include ARCH/make.arch.$(ARCH)
+
+ifneq ($(NUMPROC),no)
+      DNUMPROC = $(PPSEP)-DNUMPROC=$(NUMPROC)
+      SUFFIX=.$(NUMPROC)
+endif
 
 ifneq ($(DEBUG),no)
         DBGFLAGS=$(DEBUGFLAGS)
@@ -76,29 +73,22 @@ ifneq ($(HDF5IO),no)
 	FSRC_HDF5 = mod_hdf5io.f90
 	DHDF5 = $(PPSEP)-DHDF5IO
 endif
-
-LIBPROF =
-FSRC_PROF = perfdummy.f90
-OBJ_PROF = perfdummy.o
 ifeq ($(PROFLIB),FTIM)
 	CSRC_PROF = time.c papi.c resident_set_size.c
 	FSRC_PROF = ftimings_type.f90 ftimings_value.f90 ftimings.f90 \
 		    mod_timings.f90 perf2ftimings.f90
 #       INCLUDES += -I$(PAPI_HOME)/include
-endif
-ifeq ($(PROFLIB),LIKWID)
-	CSRC_PROF = 
-	FSRC_PROF = perf2likwid.f90
-        INCLUDES += -I$(LIKWID_HOME)/include
-	LIBPROF = -L$(LIKWID_HOME)/lib -llikwid $(RPATH)=$(LIKWID_HOME)/lib
+else
+	FSRC_PROF = perfdummy.f90
+	OBJ_PROF = perfdummy.o
 endif
 
-DOCS = 1-s2.0-S0045793014003582-main.pdf doc/doc_nsCouette.pdf
+DOCS = 1-s2.0-S0045793014003582-main.pdf doc/doc_nsPipeFlow.pdf
 
 FSOURCES = mod_getcpu.f90 wctimerclass.f90 \
            mod_fftw.f90 mod_fdInit.f90 mod_params.f90 mod_vars.f90 \
 	   mod_myMpi.f90 $(FSRC_HDF5) mod_inOut.f90 mod_nonlinear.f90 \
-           mod_timeStep.f90 nsCouette.f90 $(FSRC_PROF) 
+           mod_timeStep.f90 nsPipeFlow.f90 $(FSRC_PROF) 
 CSOURCES = getcpu.c $(CSRC_PROF)
 
 
@@ -124,8 +114,8 @@ CMP_OPTS := 'CMP_OPTS="$(MPIFC) $(FFLAGS)"'
 PPFLAGS = $(PPPRE)-D$(CODE)$(DHDF5)$(DEFINES)$(TESTS)
 IDFLAGS = $(PPPRE)-D$(GITDEV)$(PPSEP)-D$(ARCH_ID)$(PPSEP)-D$(CMP_OPTS)
 
-$(BUILD)/nsCouette.x: $(OBJS)
-	$(MPIFC) $(FFLAGS) $(DBGFLAGS) $(LDFLAGS) -o $@ $^ $(LIBFFT) $(LIBHDF5) $(LIBLA) $(LIBPROF)
+$(BUILD)/nsPipeFlow.x: $(OBJS)
+	$(MPIFC) $(FFLAGS) $(DBGFLAGS) $(LDFLAGS) -o $@ $^ $(LIBFFT) $(LIBHDF5) $(LIBLA)
 
 $(BUILD)/%.o: %.c
 	cd $(BUILD) && $(CC) $(CFLAGS) $(INCLUDES) -c ../$< -o $*.o
@@ -173,7 +163,7 @@ $(BUILD)/mod_myMpi.o : mod_myMpi.f90 $(BUILD)/mod_params.o $(BUILD)/mod_vars.o
 $(BUILD)/mod_inOut.o : mod_inOut.f90 $(BUILD)/mod_vars.o $(BUILD)/mod_fftw.o $(BUILD)/mod_myMpi.o 
 $(BUILD)/mod_nonlinear.o : mod_nonlinear.f90 $(BUILD)/mod_inOut.o $(BUILD)/mod_fdInit.o $(BUILD)/mod_fftw.o $(BUILD)/mod_myMpi.o 
 $(BUILD)/mod_timeStep.o : mod_timeStep.f90 $(BUILD)/mod_nonlinear.o $(BUILD)/mod_inOut.o 
-$(BUILD)/nsCouette.o : nsCouette.f90 $(BUILD)/mod_timeStep.o $(BUILD)/mod_getcpu.o 
+$(BUILD)/nsPipeFlow.o : nsPipeFlow.f90 $(BUILD)/mod_timeStep.o $(BUILD)/mod_getcpu.o 
 ifeq ($(HDF5IO),yes)
 $(BUILD)/mod_hdf5io.o : mod_hdf5io.f90 
 endif
@@ -189,9 +179,9 @@ $(BUILD)/perf2ftimings.o : perf2ftimings.f90 $(BUILD)/mod_timings.o
 endif
 
 
-doc: doc/doc_nsCouette.pdf
-doc/doc_nsCouette.pdf: doc/*.tex
-	cd doc && pdflatex doc_nsCouette;pdflatex doc_nsCouette
+doc: doc/doc_nsPipeFlow.pdf
+doc/doc_nsPipeFlow.pdf: doc/*.tex
+	cd doc && pdflatex doc_nsPipeFlow;pdflatex doc_nsPipeFlow
 
 #create list of dependencies
 deplist: 
@@ -201,21 +191,16 @@ clean:
 	cd $(BUILD) && rm -f *.o *.mod *.lst *.i90 *.f90
 
 forcheck: $(BUILD) $(FSOURCES_PP)
-	cd $(BUILD) && forchk -decl -f08  -ff -ancmpl -anprg -anref -shinc -shprg -shref -l forcheck.out -moddep -refstruc -I $(INCFFT) *.f90 -include $(FCKDIR)/share/forcheck/MPI_3.flb; if [ $$? -le 2 ] ; then exit 0 ; else cat forcheck.out; exit 1;fi
-
-
-ford: $(BUILD) $(FSOURCES_PP)
-	cd $(BUILD) && sed "s,XXXincludeXXX,$(INCFFT)," ../ford-config.md > ford-config.md && ford ford-config.md
-	mv $(BUILD)/ford-doc .
+	cd $(BUILD) && forchk -decl -f08  -ff -ancmpl -anprg -anref -shinc -shprg -shref -l forcheck.out -moddep -refstruc -I $(INCFFT) *.f90 -include $(FCKDIR)/share/forcheck/MPI_3.flb; if [ $$? -le 2 ] ; then exit 0 ; else exit 1;fi
 
 tar: Makefile ARCH $(SOURCES)
-	tar cvzf nsCouette_`date "+%F"`.tgz Makefile ARCH $(SOURCES)
+	tar cvzf nsPipeFlow_`date "+%F"`.tgz Makefile ARCH $(SOURCES)
 
 export: $(SOURCES) Makefile ARCH/* doc
-	mkdir -p nsCouette_dist
-	cp -r $(SOURCES) Makefile ARCH input_nsCouette $(DOCS) scripts nsCouette_dist/
-	@./export_public.sh nsCouette_dist
-	tar czf nsCouette_dist_`date "+%F"`.tgz nsCouette_dist/
+	mkdir -p nsPipeFlow_dist
+	cp -r $(SOURCES) Makefile ARCH input_nsPipeFlow $(DOCS) scripts nsPipeFlow_dist/
+	@./export_public.sh nsPipeFlow_dist
+	tar czf nsPipeFlow_dist_`date "+%F"`.tgz nsPipeFlow_dist/
 
 check: 
 	.gitlab-ci/test/validate_nscouette.sh $(ARCH) 4 4
@@ -224,5 +209,5 @@ check:
 
 help:
 	@echo "selected architecture: $(ARCH)"
-	@echo "1) adjust platform-specific settings in ARCH/make.arch.$(ARCH)"
+	@echo "1) adjust machine-specific settings in ARCH/make.arch.$(ARCH)"
 	@echo "2) build with: make ARCH=<architecture> HDF5IO=<yes|no> PROFLIB=<none|FTIM> DEBUG=<no|yes>"

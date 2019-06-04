@@ -58,11 +58,7 @@ CONTAINS
   SUBROUTINE planner_fftw(n1,n2,ifpad_in,fftw_nthreads)
 
     IMPLICIT NONE
-#ifdef __NEC__
-    include 'aslfftw3.f'
-#else
     include 'fftw3.f'
-#endif
 
     ! Flag for fftw
     !INTEGER(KIND=4), PARAMETER  :: flag_fftw = FFTW_ESTIMATE
@@ -71,8 +67,8 @@ CONTAINS
     INTEGER(KIND=4), INTENT(IN) :: n1,n2
     LOGICAL,         INTENT(IN) :: ifpad_in
     INTEGER(KIND=4), INTENT(IN) :: fftw_nthreads
-    INTEGER(KIND=4) ierr
-!$    LOGICAL omp_get_nested
+    INTEGER(KIND=4) ierr,omp_get_max_threads
+    LOGICAL omp_get_nested
 
 #ifndef BLUEGENE
     if (fftw_nthreads .gt. 1) then
@@ -133,6 +129,8 @@ CONTAINS
 
     REAL(KIND=8),    INTENT(IN)  :: x(n_log(1),n_log(2))
     COMPLEX(KIND=8), INTENT(OUT) :: x_hat(n(1)/2+1,n(2))
+    INTEGER(KIND=4) :: i
+
  
     var_R = x
     CALL dfftw_execute_dft_r2c(plan_r2c,var_R,var_C)
@@ -149,6 +147,12 @@ CONTAINS
        x_hat(:,n_log(2)/2+1) = 0.0D0
     END IF
 
+    !Enforce symmetry (0,k_z) = (0,-k_z)
+
+    do i=2,n(2)/2
+       x_hat(1,n(2)+2-i) = conjg(x_hat(1,i))
+    end do
+    
   END SUBROUTINE fwd_fft
 
   !-------------------------------------------------------
@@ -198,8 +202,7 @@ CONTAINS
     COMPLEX(KIND=8) :: x_pad(n_log(1)/2+1,n_log(2))
     INTEGER(KIND=4) :: i,j
 
-    x_pad(n(1)/2+2:,:) = (0.0D0,0.0D0)
-    x_pad(:,n(2)/2+2:n_log(2)-n(2)/2+1)= (0.0D0,0.0D0)
+    x_pad = (0.0D0,0.0D0)
     DO j=1,n(2)/2+1
        DO i=1,n(1)/2+1
           x_pad(i,j) = x(i,j)
@@ -225,6 +228,7 @@ CONTAINS
     COMPLEX(KIND=8) :: x_chop(n(1)/2+1,n(2))
     INTEGER(KIND=4) :: i,j
 
+    x_chop = (0.0D0,0.0D0)
     DO j=1,n(2)/2+1
        DO i=1,n(1)/2+1
           x_chop(i,j) = x(i,j)
