@@ -1,0 +1,119 @@
+%******************************************************************************%
+%**** les - report       ******************************************************%
+%**** 22nd februray 2017 ******************************************************%
+%**** daniel feldmann    ******************************************************%
+%**** pdflatex -> pdf    ******************************************************%
+%******************************************************************************%
+%
+%--- mandatory packages -------------------------------------------------------%
+\RequirePackage{xspace}                           % to get your spacing straight
+%------------------------------------------------------------------------------%
+%
+%--- special characters -------------------------------------------------------%
+% \DeclareRobustCommand{\increment}{\,d\!}
+\DeclareRobustCommand{\imag}{\ensuremath{\dot{\imath}}\xspace}  % imaginary unit
+\DeclareRobustCommand{\orderof}{\ensuremath{\mathcal{O}}\xspace}     % magnitude
+% \DeclareRobustCommand{\real}{\ensuremath{\mathcal{R}}\xspace}        % real part
+%------------------------------------------------------------------------------%
+%
+%--- non-dimensional numbers --------------------------------------------------%
+% \DeclareRobustCommand{\Courant}{\ensuremath{C\!o}\xspace}     % Courant number
+% \DeclareRobustCommand{\Mach}{\ensuremath{M\!a}\xspace}           % Mach number
+\DeclareRobustCommand{\Gr}{\ensuremath{G\hspace{-0.1em}r}\xspace}
+\DeclareRobustCommand{\Nui}{\ensuremath{N\hspace{-0.1em}u_{i}}\xspace}
+\DeclareRobustCommand{\Nuomi}{\ensuremath{N\hspace{-0.1em}u_{\omega,i}}\xspace}
+\DeclareRobustCommand{\Nuomo}{\ensuremath{N\hspace{-0.1em}u_{\omega,o}}\xspace}
+\DeclareRobustCommand{\Reynolds}{\ensuremath{R\hspace{-0.1em}e}\xspace}     % Reynolds number
+\DeclareRobustCommand{\ReDelta}{\ensuremath{R\hspace{-0.1em}e_{\delta}}\xspace}
+\DeclareRobustCommand{\Rei}{\ensuremath{R\hspace{-0.1em}e_{i}}\xspace}
+\DeclareRobustCommand{\Reo}{\ensuremath{R\hspace{-0.1em}e_{o}}\xspace}
+\DeclareRobustCommand{\Reom}{\ensuremath{R\hspace{-0.1em}e_{\omega}}\xspace}
+\DeclareRobustCommand{\ReTau}{\ensuremath{R\hspace{-0.1em}e_{\tau}}\xspace}
+% \DeclareRobustCommand{\Strouhal}{\ensuremath{S\!t}\xspace}   % Strouhal number
+% \DeclareRobustCommand{\Womersley}{\ensuremath{W\!o}\xspace}   % Womersley number
+%------------------------------------------------------------------------------%
+%
+%--- special variables --------------------------------------------------------%
+% \DeclareRobustCommand{\ir}{\ensuremath{k_{\text{ir}}}\xspace}          % implicit radius
+% \DeclareRobustCommand{\tauw}{\ensuremath{\tau_{\text{w}}}\xspace}      % wall shear stress
+% \DeclareRobustCommand{\tauwsw}{\ensuremath{\tau_{\text{w,SW}}}\xspace} % wall shear stress, Sexl-Womersley
+\DeclareRobustCommand{\ubulk}{\ensuremath{u_{\text{b}}}\xspace}        % bulk velocity
+% \DeclareRobustCommand{\ubulksw}{\ensuremath{u_{\text{b,SW}}}\xspace}   % bulk velocity, Sexl-Womersley
+% \DeclareRobustCommand{\upeak}{\ensuremath{u_{\text{p}}}\xspace}        % peak bulk velocity
+% \DeclareRobustCommand{\upeaksw}{\ensuremath{u_{\text{p,SW}}}\xspace}   % peak bulk velocity, Sexl-Womersley
+\DeclareRobustCommand{\utau}{\ensuremath{u_{\tau}}\xspace}             % friction velocity
+%------------------------------------------------------------------------------%
+%
+%--- indices ------------------------------------------------------------------%
+% \DeclareRobustCommand{\analytical}{\text{ana}}
+% \DeclareRobustCommand{\characteristic}{c\!h\!a}
+% \DeclareRobustCommand{\constant}{\text{const}}
+% \DeclareRobustCommand{\critical}{\text{krit}}
+% \DeclareRobustCommand{\initial}{i\!n\!i}
+% \DeclareRobustCommand{\numerical}{n\!u\!m}
+% \DeclareRobustCommand{\reference}{\text{ref}}
+% \DeclareRobustCommand{\tidal}{t\!i\!d}
+%------------------------------------------------------------------------------%
+%
+%--- finite volume sub/super scripts ------------------------------------------%
+% \DeclareRobustCommand{\alphap}{\!\alpha^{\!+}}                              % alpha plus
+% \DeclareRobustCommand{\alpham}{\!\alpha^{\!-}}                             % alpha minus
+% \DeclareRobustCommand{\betap}{\!\beta^{\!+}}                                   % beta plus
+% \DeclareRobustCommand{\betam}{\!\beta^{\!-}}                                  % beta minus
+% \DeclareRobustCommand{\betapm}{\!\beta^{\!\pm}}                          % beta plus minus
+%------------------------------------------------------------------------------%
+%
+%--- functions ----------------------------------------------------------------%
+% \DeclareRobustCommand{\Bessel}{\ensuremath{\mathcal{J}_{0}}\xspace}   % Bessel function of first kind and order zero
+% \renewcommand{\cos}{\operatorname{cos}}  % {c\!o\!s\!}
+% \renewcommand{\cosh}{c\!o\!s\!h}
+% \renewcommand{\max}{m\!a\!x}
+\DeclareRobustCommand{\rms}{\ensuremath{R\!M\!S\!}}
+% \renewcommand{\sin}{sin\!}
+%------------------------------------------------------------------------------%
+%
+%--- vector operators ---------------------------------------------------------%
+\renewcommand{\vec}{\boldsymbol}
+% \DeclareRobustCommand{\divergence}{\operatorname{div}} %{d\!i\!v\!}
+% \DeclareRobustCommand{\gradient}{\operatorname{grad}} %{g\!r\!a\!d}
+\DeclareRobustCommand{\laplacian}{\vec{\Delta}}
+\RequirePackage{rotating}                                    % provides sideways
+\renewcommand{\nabla}{\begin{sideways}\begin{sideways}$\laplacian$\end{sideways}\end{sideways}}
+%------------------------------------------------------------------------------%
+%
+%--- relations ----------------------------------------------------------------%
+\DeclareRobustCommand{\constraint}{\stackrel{!}{=}}
+%------------------------------------------------------------------------------%
+%
+%--- statistical average delimiter --------------------------------------------%
+\DeclareRobustCommand{\lla}{\left\langle}
+\DeclareRobustCommand{\rra}{\right\rangle}
+%------------------------------------------------------------------------------%
+%
+%--- some names ---------------------------------------------------------------%
+\DeclareRobustCommand{\c}{\textbf{\texttt{C}}\xspace}
+\DeclareRobustCommand{\cuda}{\textbf{\texttt{CUDA}}\xspace}
+\DeclareRobustCommand{\flowsi}{\textbf{\texttt{flowsi}}\xspace}
+\DeclareRobustCommand{\fortran}{\textbf{\texttt{Fortran}}\xspace}
+\DeclareRobustCommand{\hdf}{\textbf{\texttt{HDF5}}\xspace}
+\DeclareRobustCommand{\nsc}{\texttt{\textbf{nsCouette}}\xspace}
+\DeclareRobustCommand{\nsp}{\texttt{\textbf{nsPipe}}\xspace}
+\DeclareRobustCommand{\of}{\textbf{\texttt{OpenFOAM}}\xspace}
+\DeclareRobustCommand{\opf}{\href{www.openpipeflow.org}{\textbf{\texttt{openpipeflow}}}\xspace}
+\DeclareRobustCommand{\mpi}{\textbf{\texttt{MPI}}\xspace}
+\DeclareRobustCommand{\omp}{\textbf{\texttt{OpenMP}}\xspace}
+\DeclareRobustCommand{\paraview}{\textbf{\texttt{ParaView}}\xspace}
+\DeclareRobustCommand{\visit}{\textbf{\texttt{VisIt}}\xspace}
+
+%------------------------------------------------------------------------------%
+%
+\DeclareRobustCommand{\code}[1]{\textbf{\texttt{\color{black}#1}}\xspace}
+%------------------------------------------------------------------------------%
+% \DeclareRobustCommand{\ie}{i.\,e.\,}
+% \DeclareRobustCommand{\Ie}{I.\,e.\,}
+% \DeclareRobustCommand{\eg}{e.\,g.\,}
+% \DeclareRobustCommand{\Eg}{E.\,g.\,}
+%------------------------------------------------------------------------------%
+%
+%
+%

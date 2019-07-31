@@ -63,10 +63,10 @@ MODULE mod_params
   
   REAL(KIND=8), allocatable :: r(:),th(:),z(:)
 
-
-  REAL(KIND=8)    :: gap = 0.d0
-  REAL(KIND=8)    :: gra = 0.d0
-  REAL(KIND=8)    :: nu  = 0.d0
+  ! some dimensional quantities for TE_CODE only
+  real(kind=8) :: gap = 0.0d0 ! gap size in cm
+  real(kind=8) :: gra = 0.0d0 ! gravitational acceleration in g/cm**3
+  real(kind=8) :: nu  = 0.0d0 ! kinematic viscosity in cm**2/s
 
   !------------------------------------MPI & FFTW parameters
   

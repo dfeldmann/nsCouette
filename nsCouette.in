@@ -8,21 +8,21 @@ eta   = 0.868d0              ! aspect ratio => r_i = eta/(1-eta),r_o = 1/(1-eta)
 /
 
 &parameters_physics
-Re_i =   200.0d0           ! inner cylinder Reynolds number
-Re_o =  -200.0d0           ! outer cylinder Reynolds number
-Gr   =    50.0d0           ! Grashof number, Gr = Ra/Pr
-Pr   =     0.71d0          ! Prandtl number
-gap  =     3.25d0          ! gap size in cm                          [TE_CODE only]
-gra  =   980.0d0           ! gravitational acceleration in g/cm**3   [TE_CODE only]
-nu   =     1.01d-2         ! kinematic viscosity in cm**2 /s         [TE_CODE only]
+Re_i =   200.0d0           ! Inner cylinder Reynolds number
+Re_o =  -200.0d0           ! Outer cylinder Reynolds number
+Gr   =    50.0d0           ! Grashof number, Gr = Ra/Pr            [TE_CODE only]
+Pr   =     0.71d0          ! Prandtl number                        [TE_CODE only]
+gap  =     3.25d0          ! Gap size in cm                        [TE_CODE only]
+gra  =   980.0d0           ! Gravitational acceleration in g/cm**3 [TE_CODE only]
+nu   =     1.01d-2         ! Kinematic viscosity in cm**2 /s       [TE_CODE only]
 /
 
 &parameters_timestep
-numsteps    = 10000        ! number of steps 
-init_dt     = 1.0d-4       ! initial size of timestep
-variable_dt = T            ! use a variable (=T) or fixed (=F) timestep
-maxdt       = 1.0d-2       ! maximum size of timestep
-Courant     = 0.25d0       ! CFL safety factor
+numsteps    = 10000        ! Number of timesteps to compute
+variable_dt = T            ! Use a variable (T) or a constant (F) timestep size
+init_dt     = 1.00d-5      ! Initial (T) or constant (F) size of timestep 
+maxdt       = 1.00d-2      ! Maximum allowed size of timestep (T)
+Courant     = 0.25d+0      ! CFL safety factor
 /
 
 &parameters_output

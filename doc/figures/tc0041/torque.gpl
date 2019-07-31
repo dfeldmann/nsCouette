@@ -1,0 +1,59 @@
+#!/usr/bin/env gnuplot
+#
+# Purpose:  Plot temporal evolution of inner/outer torque output from a nsCouette
+#           simultion, nsCouette/tc0041
+# Usage:    gnuplot torque.gpl
+# Authors:  Daniel Feldmann
+# Created:  25th August 2018
+# Modified: 13th September 2018
+
+# output
+set terminal postscript eps enhanced color font 'Times-Roman,16' linewidth 1.5 size 08.00cm, 06.00cm
+file = 'torque.eps'
+set output file
+
+# title
+set title 'Temporal evolution of inner/outer torque, tc0041'
+set notitle 
+
+# Taylor-Couette set-up
+nutc = 1.0 # Taylor-Couette analytical torque (Nusselt number)
+
+# legend
+set key top right
+
+# 1st x axis
+set xlabel 't in d^2/{/Symbol n}'
+set format x "%.1f"
+set xrange [0.0: 1.5   ]
+set xtics   0.0, 0.5
+set mxtics  5
+
+# 1st y axis
+set ylabel 'Nu_{/Symbol w}'
+set format y "%.1f"
+set yrange [0.9:  1.6]
+set ytics   0.0,  0.5
+set mytics  5
+
+# grid lines
+set nogrid
+
+# line styles with colours appropriate for colour-blind
+set style line 10 lc rgb '#000000' dt 2 lw 1.5 # black
+set style line 11 lc rgb '#D55E00' dt 1 lw 1.5 # vermillon
+set style line 12 lc rgb '#0072B2' dt 1 lw 1.5 # blue
+set style line 13 lc rgb '#009E73' dt 1 lw 1.5 # bluish green
+set style line 14 lc rgb '#E69F00' dt 1 lw 1.5 # orange
+set style line 15 lc rgb '#56B4E9' dt 1 lw 1.5 # sky blue
+set style line 16 lc rgb '#CC79A7' dt 1 lw 1.5 # reddish purple
+set style line 17 lc rgb '#F0E442' dt 1 lw 1.5 # yellow 
+
+# main plot
+set style data lines
+plot nutc t 'Taylor-Couette analytical solution' ls 10,\
+     'torque' u ($1):($2) t 'Inner' ls 11,\
+     'torque' u ($1):($3) t 'Outer' ls 12
+
+# convert to pdf (epstopdf comes with e.g. TeXlive)
+system('epstopdf '.file)

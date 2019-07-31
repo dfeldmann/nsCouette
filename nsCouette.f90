@@ -126,7 +126,7 @@ program nscouette
   call open_files()
   call init_probes() ! initialise time series output at several probe locations
 
-  call output_pars() ! write set of parameters to file
+  call output_pars() ! write final set of parameters to file
   
   call perf_context_start('pre')
   call pre_timestep(init = .true.)

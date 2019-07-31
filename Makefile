@@ -93,7 +93,7 @@ ifeq ($(PROFLIB),LIKWID)
 	LIBPROF = -L$(LIKWID_HOME)/lib -llikwid $(RPATH)=$(LIKWID_HOME)/lib
 endif
 
-DOCS = 1-s2.0-S0045793014003582-main.pdf doc/doc_nsCouette.pdf
+DOCS = doc/nsCouetteLopez2019.pdf doc/nsCouetteShi2015.pdf doc/nsCouetteUserGuide.pdf
 
 FSOURCES = mod_getcpu.f90 wctimerclass.f90 \
            mod_fftw.f90 mod_fdInit.f90 mod_params.f90 mod_vars.f90 \
@@ -189,9 +189,9 @@ $(BUILD)/perf2ftimings.o : perf2ftimings.f90 $(BUILD)/mod_timings.o
 endif
 
 
-doc: doc/doc_nsCouette.pdf
-doc/doc_nsCouette.pdf: doc/*.tex
-	cd doc && pdflatex doc_nsCouette;pdflatex doc_nsCouette
+doc: doc/nsCouetteUserGuide.pdf
+doc/nsCouetteUserGuide.pdf: doc/*.tex
+	cd doc && pdflatex nsCouetteUserGuide;pdflatex nsCouetteUserGuide
 
 #create list of dependencies
 deplist: 

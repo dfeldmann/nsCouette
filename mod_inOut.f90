@@ -18,8 +18,6 @@
 ! along with NSCouette.  If not, see <http://www.gnu.org/licenses/>.        !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!======================================================================
-!
 ! Input & Output
 !   Input: c.f. input file 'input_nsCouette'
 !   Output:
@@ -30,8 +28,7 @@
 !     5) global parameters to file 'parameter.dat'
 !     6) temporal evolution of velocity and temperature at six user
 !        defined radial probe locations
-!
-!======================================================================
+
 MODULE mod_inOut
   
   USE mod_myMpi
@@ -54,7 +51,7 @@ MODULE mod_inOut
   END TYPE spec
   
   TYPE(spec),ALLOCATABLE,DIMENSION(:,:) :: aux_hat_mp
-  LOGICAL, PRIVATE ::  scale=.false.
+  logical, private :: scale = .false. ! remap, scale, interpolate inital condition to specified grid if true
 
   namelist /parameters_grid/ m_r,m_th,m_z0,k_th0,k_z0,eta
   namelist /parameters_physics/ re_i,re_o,gr,pr,gap,gra,nu
@@ -75,15 +72,23 @@ MODULE mod_inOut
   integer(kind=8), dimension(prl_n) :: prl_nth  ! azimtuhal index of each probe location
   integer(kind=8), dimension(prl_n) :: prl_nz   ! axial index of each probe location
 
-CONTAINS
+contains
+
 
 
 subroutine read_pars()
-! Read set of parameters from std in < nsCouette.in, only on
-! one rank, and than broadcast the information to all ranks
+! Purpose: Read set of parameters using predefined namelists
+! Called from: nsCouette.f90 
+! Content:
+! + Read predefined namelists from std in, only on root
+! + Compute some extra parameters, only on root
+! + Broadcast final set of parameters
+
 implicit none
 
 if (myid .eq. root) then
+
+ ! Read namelists from std in < nsCouette.in
  read(*, nml=parameters_grid)
  read(*, nml=parameters_physics)
  read(*, nml=parameters_timestep)
@@ -91,68 +96,70 @@ if (myid .eq. root) then
  read(*, nml=parameters_control)
  read(*, nml=parameters_initialcondition)
 
+ ! Set some extra parameters
+ dt = init_dt
+#ifdef TE_CODE
+ eps = nu**2.0d0*gr/(gra*gap**3.0d0) ! Relative density variation
+#else
+ gr  = 0.0d0 ! Not used in the non-TE_CODE
+ pr  = 0.0d0
+ eps = 0.0d0
+#endif /* TE_CODE */
 #ifdef TEST2
  ! Taylor number as input parameter (turn into inner cylinder Reynolds number)
  re_i = sqrt((1.0d0-eta**2.0d0)*re_i/(2.0d0*(1.0d0-eta)**2.0d0))
 #endif /* TEST2 */
 
-#ifdef TE_CODE
- ! Compute relative density variation
- eps = nu**2.0d0*gr/(gra*gap**3.0d0)
-#else
- ! Not used in the non-TE_CODE
- gr  = 0.0d0
- pr  = 0.0d0
- eps = 0.0d0
-#endif /* TE_CODE */
 end if
 
-! Broadcast parameters
-call MPI_Bcast(m_r, 1,MPI_INTEGER,root,comm,ierr)
-call MPI_Bcast(m_th,1,MPI_INTEGER,root,comm,ierr)
-call MPI_Bcast(m_z0,1,MPI_INTEGER,root,comm,ierr)
-call MPI_Bcast(k_th0,1,MPI_REAL8,root,comm,ierr)
-call MPI_Bcast(k_z0,1,MPI_REAL8,root,comm,ierr)
-call MPI_Bcast(eta,1,MPI_REAL8,root,comm,ierr)
-call MPI_Bcast(re_i,1,MPI_REAL8,root,comm,ierr)
-call MPI_Bcast(re_o,1,MPI_REAL8,root,comm,ierr)
-call MPI_Bcast(restart,1,MPI_INTEGER,root,comm,ierr)
-call MPI_Bcast(runtime,1,MPI_INTEGER,root,comm,ierr)
-call MPI_Bcast(fbase_ic,len(fBase_ic),MPI_CHARACTER,root,comm,ierr)
-call MPI_Bcast(init_dt,1,MPI_REAL8,root,comm,ierr)
-call MPI_Bcast(numsteps,1,MPI_INTEGER,root,comm,ierr)
-call MPI_Bcast(dn_coeff,1,MPI_INTEGER,root,comm,ierr)
-call MPI_Bcast(dn_ke,1,MPI_INTEGER,root,comm,ierr)
-call MPI_Bcast(dn_vel,1,MPI_INTEGER,root,comm,ierr)
-call MPI_Bcast(dn_nu,1,MPI_INTEGER,root,comm,ierr)
-call MPI_Bcast(dn_hdf5,1,MPI_INTEGER,root,comm,ierr)
-call MPI_Bcast(print_time_screen,1,MPI_INTEGER,root,comm,ierr)
-call MPI_Bcast(variable_dt,1,MPI_LOGICAL,root,comm,ierr)
-call MPI_Bcast(courant,1,MPI_REAL8,root,comm,ierr)
-call MPI_Bcast(maxdt,1,MPI_REAL8,root,comm,ierr)
-call MPI_Bcast(ic_tcbf, 1, MPI_LOGICAL, root, comm, ierr)
-call MPI_Bcast(ic_temp, 1, MPI_LOGICAL, root, comm, ierr)
-call MPI_Bcast(ic_pert, 1, MPI_LOGICAL, root, comm, ierr)
-call MPI_Bcast(ic_p, ic_np*3, MPI_REAL8, root, comm, ierr)
+! Broadcast final set of parameters
+call mpi_bcast(m_r, 1,mpi_integer,root,comm,ierr)
+call mpi_bcast(m_th,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(m_z0,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(k_th0,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(k_z0,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(eta,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(re_i,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(re_o,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(restart,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(runtime,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(fbase_ic,len(fbase_ic),mpi_character,root,comm,ierr)
+call mpi_bcast(init_dt,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(dt,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(numsteps,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(dn_coeff,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(dn_ke,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(dn_vel,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(dn_nu,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(dn_hdf5,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(dn_prbs,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(print_time_screen,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(variable_dt,1,mpi_logical,root,comm,ierr)
+call mpi_bcast(courant,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(maxdt,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(ic_tcbf, 1, mpi_logical, root, comm, ierr)
+call mpi_bcast(ic_temp, 1, mpi_logical, root, comm, ierr)
+call mpi_bcast(ic_pert, 1, mpi_logical, root, comm, ierr)
+call mpi_bcast(ic_p, ic_np*3, mpi_real8, root, comm, ierr)
 #ifdef TE_CODE
-call MPI_Bcast(gr,1,MPI_REAL8,root,comm,ierr)
-call MPI_Bcast(pr,1,MPI_REAL8,root,comm,ierr)
-call MPI_Bcast(eps,1,MPI_REAL8,root,comm,ierr)
+call mpi_bcast(gr,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(pr,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(eps,1,mpi_real8,root,comm,ierr)
 #endif /* TE_CODE */
-
-dt = init_dt
 
 end subroutine read_pars
 
 
 
 subroutine output_pars()
-! Write set of parameters to file
-
+! Purpose: Write final set of parameters to file
+! Called from: nsCouette.f90
+! + Open file, write namelists, close, only on root
+ 
 implicit none
 
 if (myid .eq. root) then
- open(unit=106, file='parameter')
+ open(unit=106, file='parameters.out')
  write(106, nml=parameters_grid)
  write(106, nml=parameters_physics)
  write(106, nml=parameters_timestep)
@@ -166,79 +173,98 @@ end subroutine output_pars
 
 
 
-  SUBROUTINE read_restart_pars()
-  ! Read the parameters of the initial velocity file
-    IMPLICIT NONE
-    INTEGER(KIND=4) :: ndims=2
-    INTEGER(KIND=4) :: sizes(2),subsizes(2),starts(2)
-    CHARACTER(8) ::  suffix
+subroutine read_restart_pars()
+! Purpose: Read the set of parameters for the initial velocity file when
+! restarting from a checkpoint coeff file.
+! Called from: nsCouette.f90
+! Content:
+! + Read one namelist from file restart.in
+! + Overwrite restart.in to prevent loops of restart attempts in case of errors
+! + Reset dt to user specified value, only in case of constant timestep size
+! + Broadcast the parameters of this namelist
+! + Construct file name to read initial conditions from
+! + Update time and timestep according to restart mode
+! + Check consistency of specified and read grid resolution -> remapping
+! + Allocate new arrays in case of different grids
 
-    if (myid == root) then
-       open(unit=107,file='restart')
-       read(107,nml=parameters_restart)
-       close(107)
+implicit none
+integer(kind=4) :: ndims=2
+integer(kind=4) :: sizes(2), subsizes(2), starts(2)
+character(8) ::  suffix
+
+if (myid .eq. root) then
+
+ ! Read one namelist from file and erase afterwards
+ open(unit=107, file='restart')
+ read(107, nml=parameters_restart)
+ write(107, *) ' ' ! write empty file
+ close(107)
+
+ ! Reset to specified value in case of non-variable timestep size
+ if (variable_dt .eqv. .false.) then 
+  dt = init_dt
+  write(*,'(a, es23.15e3)') 'Constant user-specified timestep size set to dt = init_dt =', dt
+ else
+  write(*,'(a, es23.15e3, a)') 'Variable timestep size with initial dt =', dt, ' read from restart file'
+ end if
+
+end if
+
+! Broadcast the parameters of this namelist
+call mpi_bcast(i_time,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(time,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(dt,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(m_r_ifile,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(m_th_ifile,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(m_z_ifile,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(fbase_ic,len(fbase_ic),mpi_character,root,comm,ierr)
+
+! Construct file name to read initial conditions from
+write(suffix, '(i0.8)') i_time
+fname_ic = 'coeff_'//trim(fbase_ic)//'.'//suffix
+
+! Update time and time step according to restart mode
+i_start = i_time+1
+if (restart .eq. 2) then
+ time = 0.0d0
+ i_start = 1
+end if
+
+! Check consistency of specified and read grid resolution
+if ((m_r .ne. m_r_ifile) .or. (m_z .ne. m_z_ifile) .or. (m_th .ne. m_th_ifile)) then
+
+ scale = .true. ! Detected inconsistent resolution, report here, remap later
+ if (myid .eq. root) then
+  write(*, '(a)') 'Resolution of the restart file differs from the specified resolution!'
+  write(*, '(a)') 'Remap the initial condition (parameters_restart -> parameters_grid):'
+  write(*, '(a5, i5.5, a4, i5.5)') 'm_r  ', m_r_ifile,   ' -> ', m_r
+  write(*, '(a5, i5.5, a4, i5.5)') 'm_th ', m_th_ifile,  ' -> ', m_th
+  write(*, '(a5, i5.5, a4, i5.5)') 'm_z0 ', m_z_ifile/2, ' -> ', m_z0
+ end if
+
+ m_f_ifile = m_z_ifile*(m_th_ifile+1)
+ mp_fmax_ifile = ceiling(real(m_f_ifile,kind=8)/real(numprocs,kind=8)) ! Fourier points per proc 
+
+ if ((MOD(m_f_ifile,numprocs) /= 0)) then
+  mp_f_ifile=(numprocs+mp_fmax_ifile*numprocs-1)/numprocs
+  mp_f_ifile=max(0,min(mp_f_ifile,m_f_ifile-myid*mp_f_ifile))
+  m_f_ifile=mp_fmax_ifile*numprocs
+ else
+  mp_f_ifile=mp_fmax_ifile
+ end if
        
-       !erase restart inof in order to avoid loops of restart attempts
-       open(unit=107,file='restart')
-       write(107,*)
-       close(107)
-    END IF
+ sizes = (/m_r_ifile,m_f_ifile/)
+ subsizes = (/m_r_ifile,mp_fmax_ifile/)
+ starts = (/0,myid*mp_fmax_ifile/)
+ CALL MPI_Type_create_subarray(ndims,sizes,subsizes,starts,&
+    MPI_ORDER_FORTRAN,mpi_spec,filetype2,ierr)
+ CALL MPI_Type_commit(filetype2,ierr)
+ 
+ ALLOCATE(aux_hat_mp(m_r_ifile,mp_f_ifile))
 
-    CALL MPI_Bcast(i_time,1,MPI_INTEGER,root,comm,ierr)
-    CALL MPI_Bcast(time,1,MPI_REAL8,root,comm,ierr)
-    CALL MPI_Bcast(dt,1,MPI_REAL8,root,comm,ierr)
-    CALL MPI_Bcast(m_r_ifile,1,MPI_INTEGER,root,comm,ierr)
-    CALL MPI_Bcast(m_th_ifile,1,MPI_INTEGER,root,comm,ierr)
-    CALL MPI_Bcast(m_z_ifile,1,MPI_INTEGER,root,comm,ierr)
-    CALL MPI_Bcast(fBase_ic,len(fBase_ic),MPI_CHARACTER,root,comm,ierr)
+end if
 
-    WRITE(suffix,'(I0.8)') i_time
-    fName_ic='coeff_'//trim(fBase_ic)//'.'//suffix
-
-    i_start=i_time+1
-
-    if (restart == 2) then
-       time = 0d0
-       i_start = 1
-    end if
-    
-
-    !Check if number of modes in parameters module matches the number of modes in input file 
-    
-    if((m_r .ne. m_r_ifile) .or. (m_z .ne. m_z_ifile) .or.(m_th .ne. m_th_ifile))then
-       
-       if (myid == root) then
-          print*,'m_r:  ',m_r,'->',m_r_ifile
-          print*,'m_th: ',m_th,'->',m_th_ifile
-          print*,'m_z:  ',m_z,'->',m_z_ifile
-          print *,'WARNING: grid resolution differs from restart file, now remapping ...'
-       endif
-
-       
-       m_f_ifile = m_z_ifile*(m_th_ifile+1)
-       mp_fmax_ifile = ceiling(real(m_f_ifile,kind=8)/real(numprocs,kind=8)) ! Fourier points per proc 
-       
-
-       if ((MOD(m_f_ifile,numprocs) /= 0)) then
-          mp_f_ifile=(numprocs+mp_fmax_ifile*numprocs-1)/numprocs
-          mp_f_ifile=max(0,min(mp_f_ifile,m_f_ifile-myid*mp_f_ifile))
-          m_f_ifile=mp_fmax_ifile*numprocs
-       else
-          mp_f_ifile=mp_fmax_ifile
-       endif
-               
-       sizes = (/m_r_ifile,m_f_ifile/)
-       subsizes = (/m_r_ifile,mp_fmax_ifile/)
-       starts = (/0,myid*mp_fmax_ifile/)
-       CALL MPI_Type_create_subarray(ndims,sizes,subsizes,starts,&
-            MPI_ORDER_FORTRAN,mpi_spec,filetype2,ierr)
-       CALL MPI_Type_commit(filetype2,ierr)
-       scale=.true.
-       ALLOCATE(aux_hat_mp(m_r_ifile,mp_f_ifile))
-       
-    end if
-
-  END SUBROUTINE read_restart_pars
+end subroutine read_restart_pars
 
 
 
@@ -557,10 +583,10 @@ end subroutine write_probes
        arch_ifile=arch_id
        cmp_ifile=cmp_flgs
 
-       !write metadata for each coeff file for archival purposes
-       open(unit=107,file=trim(fName_ic)//'.info')
-       write(107,nml=parameters_restart)
-       write(107,nml=parameters_info)
+       ! Write metadata for each coeff file for archival purposes
+       open(unit=107, file=trim(fName_ic)//'.info')
+       write(107, nml=parameters_restart)
+       write(107, nml=parameters_info)
        close(107)
 
 
@@ -838,7 +864,7 @@ end subroutine setup_wavenumber
     endif
     if (myid == root) print*,'restarting from '//fName_ic
 
-    if(scale) then
+    if (scale .eqv. .true.) then
        
        CALL MPI_File_set_view(fh,disp,mpi_spec,filetype2,"native",&
             MPI_INFO_NULL,ierr)

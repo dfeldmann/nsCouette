@@ -994,9 +994,9 @@ else if (dterr .gt. tolerance_dterr) then
 else
  if ((myid .eq. root) .and. (modulo(i_time, print_time_screen) .eq. 0)) then
   if (variable_dt) then
-   print*,' step=',i_time,' dt=', dt
+   print*, ' step=', i_time, ' dt=', dt
   else
-   print*,' step=',i_time,' its=',iter
+   print*, ' step=', i_time, ' dt=', dt, ' its=', iter
   end if
  end if
  iter = 0
