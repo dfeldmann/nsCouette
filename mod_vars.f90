@@ -1,31 +1,26 @@
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! This file is part of NSPipeflow, a HPC code for DNS of pipe flow          !
-!                                                                           !
-! Copyright (C) 2016 Marc Avila, Bjoern Hof, Jose Manuel Lopez,             !
-!                    Markus Rampp, Liang Shi                                !
-!                                                                           !
-! NSPipeflow is free software: you can redistribute it and/or modify         !
-! it under the terms of the GNU General Public License as published by      !
-! the Free Software Foundation, either version 3 of the License, or         !
-! (at your option) any later version.                                       !
-!                                                                           !
-! NSPipeflow is distributed in the hope that it will be useful,              !
-! but WITHOUT ANY WARRANTY; without even the implied warranty of            !
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             !
-! GNU General Public License for more details.                              !
-!                                                                           !
-! You should have received a copy of the GNU General Public License         !
-! along with NSPipeflow.  If not, see <http://www.gnu.org/licenses/>.        !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-!=============================================
-!
-!     define global variables & types
-!
-!=============================================                                    
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! This file is part of nsCouette -- A high-performance code for direct         !
+! numerical simulations of turbulent Taylor-Couette flow                       !
+!                                                                              !
+! Copyright (C) 2019 Marc Avila, Bjoern Hof, Jose Manuel Lopez, Markus Rampp,  !
+!                    Liang Shi, Alberto Vela-Martin, Daniel Feldmann.          !
+!                                                                              !
+! nsCouette is free software: you can redistribute it and/or modify it under   !
+! the terms of the GNU General Public License as published by the Free         !
+! Software Foundation, either version 3 of the License, or (at your option)    !
+! any later version.                                                           !
+!                                                                              !
+! nsCouette is distributed in the hope that it will be useful, but WITHOUT ANY !
+! WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    !
+! FOR A PARTICULAR PURPOSE. See the GNU General Public License for more        !
+! details.                                                                     !
+!                                                                              !
+! You should have received a copy of the GNU General Public License along with !
+! nsCouette. If not, see <http://www.gnu.org/licenses/>.                       !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 MODULE mod_vars
+!     define global variables & types
   
   USE mod_fftw
   USE mod_params

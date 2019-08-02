@@ -19,42 +19,39 @@
 # nsCouette. If not, see <http://www.gnu.org/licenses/>.                       !
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#GCC compilers (compiler suite 4.7 or later is recommended)
-# and generic blas, lapack, fftw3 (/usr/lib/...)
-
-#adapt the MPI compiler wrappers!
+# CRAY XC50 w. Marvell ThunderX2 ARM v8.1 CPU
+# Isambard Phase-2 https://gw4-isambard.github.io/docs/index.html
+# under the (default) cray programming environment
+# module module load cray-fftw cray-hdf5-parallel craype-arm-thunderx2
 
 ###############################################
-#GNU compiler (gcc 4.7 or later is recommended)
+#CRAY compiler with CRAY wrappers
 ###############################################
-MPIFC = mpif90
-FFLAGS = -fopenmp -cpp -O3 -mtune=native
-DEBUGFLAGS = -g -Wall -fcheck=all -finit-real=snan -ffpe-trap=invalid,zero,overflow --coverage
-
-CC = gcc
-CFLAGS = -fopenmp 
+MPIFC = ftn
+FFLAGS = -e F -O3 -dynamic 
+CC = cc 
+CFLAGS = -O3
 
 RPATH=-Wl,-rpath
 PPPRE=-Wp,
 PPSEP=,
 
+################################################
+##BLAS, LAPACK from Cray libsci
+################################################
+LIBLA = -L$(CRAY_LIBSCI_PREFIX_DIR)/lib -lsci_cray $(RPATH)=$(CRAY_LIBSCI_PREFIX_DIR)/lib
+#DEFINES +=
 
-###############################################
-#BLAS, LAPACK from ATLAS
-###############################################
-LIBLA = -lblas -llapack
-
-
-###############################################
-#FFTs from FFTW 
-###############################################
-LIBFFT = -lfftw3 -lfftw3_omp -lm
-INCFFT = /usr/include
+################################################
+##FFTs from FFTW3
+################################################
+LIBFFT = -L$(FFTW_DIR) -lfftw3 -lm $(RPATH)=$(FFTW_DIR)
+INCFFT = $(FFTW_INC)
 
 ###############################################
 #MPI-parallel HDF5
 ###############################################
 ifneq ($(HDF5IO),no)
-	LIBHDF5 = -lhdf5_fortran -lhdf5 -lz
-#	INCLUDES = -I$(HDF5_HOME)/include
+	LIBHDF5 = -L$(HDF5_DIR)/lib -lhdf5_fortran -lhdf5 -lz $(RPATH)=$(HDF5_DIR)/lib
+	INCLUDES = -I$(HDF5_DIR)/include
 endif

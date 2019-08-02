@@ -19,42 +19,49 @@
 # nsCouette. If not, see <http://www.gnu.org/licenses/>.                       !
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#GCC compilers (compiler suite 4.7 or later is recommended)
-# and generic blas, lapack, fftw3 (/usr/lib/...)
-
-#adapt the MPI compiler wrappers!
+# Local linux cluster fsmcluster@zarm.uni-bremen.de
+# Intel parallel studio PSXE under Linux Centos
+# BLAS/LAPACK and FFTW from MKL (PSXE), hand build HDF5, CURL, ZLIB
+# Daniel Feldmann
+# 05th May 2018
 
 ###############################################
-#GNU compiler (gcc 4.7 or later is recommended)
+#Intel compiler
 ###############################################
-MPIFC = mpif90
-FFLAGS = -fopenmp -cpp -O3 -mtune=native
-DEBUGFLAGS = -g -Wall -fcheck=all -finit-real=snan -ffpe-trap=invalid,zero,overflow --coverage
+MPIFC = mpiifort
+FFLAGS = -qopenmp -fpp -O3 -xHost -fp-model source -mcmodel medium -shared-intel -align array16byte -heap-arrays 10
+DEBUGFLAGS = -g -debug -traceback -check all,noarg_temp_created -fpe0 -init=arrays -init=snan
 
-CC = gcc
-CFLAGS = -fopenmp 
+CC = icc 
+CFLAGS = -qopenmp -mcmodel medium -shared-intel
 
-RPATH=-Wl,-rpath
+RPATH=-Xlinker -rpath
 PPPRE=-Wp,
 PPSEP=,
 
+###############################################
+#BLAS, LAPACK from Intel MKL
+###############################################
+LIBLA = -L$(MKLROOT)/lib/intel64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm $(RPATH)=$(MKLROOT)/lib/intel64
+DEFINES +=$(PPSEP)-DWITHMKL
+
 
 ###############################################
-#BLAS, LAPACK from ATLAS
+#FFTs from MKL (using MKL's FFTW wrappers)
 ###############################################
-LIBLA = -lblas -llapack
+LIBFFT =
+INCFFT = $(MKLROOT)/include/fftw
 
+##FFTs from a generic FFTW
+#LIBFFT = -L$(FFTW_HOME)/lib -lfftw3_omp -lfftw3 -lm $(RPATH)=$(FFTW_HOME)/lib
+#INCFFT = $(FFTW_HOME)/include
 
-###############################################
-#FFTs from FFTW 
-###############################################
-LIBFFT = -lfftw3 -lfftw3_omp -lm
-INCFFT = /usr/include
 
 ###############################################
 #MPI-parallel HDF5
 ###############################################
+HDF5_HOME=/home/feldmann/hdf5/hdf5-1.10.0-patch1
 ifneq ($(HDF5IO),no)
-	LIBHDF5 = -lhdf5_fortran -lhdf5 -lz
-#	INCLUDES = -I$(HDF5_HOME)/include
+	LIBHDF5 = -L$(HDF5_HOME)/lib -lhdf5_fortran -lhdf5 -lz $(RPATH)=$(HDF5_HOME)/lib
+	INCLUDES = -I$(HDF5_HOME)/include
 endif

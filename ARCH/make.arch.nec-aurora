@@ -19,42 +19,40 @@
 # nsCouette. If not, see <http://www.gnu.org/licenses/>.                       !
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#GCC compilers (compiler suite 4.7 or later is recommended)
-# and generic blas, lapack, fftw3 (/usr/lib/...)
-
-#adapt the MPI compiler wrappers!
+#Intel compilers (compiler suite 13.1 or later is recommended)
+# and Intel MKL (MKL 11.1 or later)
 
 ###############################################
-#GNU compiler (gcc 4.7 or later is recommended)
+#Intel compiler
 ###############################################
-MPIFC = mpif90
-FFLAGS = -fopenmp -cpp -O3 -mtune=native
-DEBUGFLAGS = -g -Wall -fcheck=all -finit-real=snan -ffpe-trap=invalid,zero,overflow --coverage
+MPIFC = mpinfort
+FFLAGS = -fopenmp -fpp -O3
+DEBUGFLAGS = -g -debug -traceback
 
-CC = gcc
-CFLAGS = -fopenmp 
+CC = ncc 
+CFLAGS = -fopenmp
 
-RPATH=-Wl,-rpath
+RPATH=-Xlinker -rpath
 PPPRE=-Wp,
 PPSEP=,
 
+###############################################
+#BLAS, LAPACK from Intel MKL
+###############################################
+LIBLA = -L$(NLC_HOME)/lib/ -llapack -lblas_sequential 
+
 
 ###############################################
-#BLAS, LAPACK from ATLAS
+#FFTs from the NEC NLC
 ###############################################
-LIBLA = -lblas -llapack
+LIBFFT = -L$(NLC_HOME)/lib -laslfftw3 -lasl_sequential  
+INCFFT = $(NLC_HOME)/include
 
-
-###############################################
-#FFTs from FFTW 
-###############################################
-LIBFFT = -lfftw3 -lfftw3_omp -lm
-INCFFT = /usr/include
 
 ###############################################
 #MPI-parallel HDF5
 ###############################################
 ifneq ($(HDF5IO),no)
-	LIBHDF5 = -lhdf5_fortran -lhdf5 -lz
-#	INCLUDES = -I$(HDF5_HOME)/include
+	LIBHDF5 = -L$(HDF5_HOME)/lib -lhdf5_fortran -lhdf5 -lz $(RPATH)=$(HDF5_HOME)/lib
+	INCLUDES = -I$(HDF5_HOME)/include
 endif
