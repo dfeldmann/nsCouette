@@ -25,7 +25,7 @@ To build the executable, a Makefile for a standard x86_64 Linux software stack w
 ls ARCH/make.arch.*
 
 # Build the code (e.g. with Intel compilers and MKL)
-make ARCH=intel-mkl
+make ARCH=intel-mkl HDF5IO=NO
 
 # Build the code (more build options)
 make ARCH=myPlatform CODE=<STD_CODE|TE_CODE> HDF5IO=<NO|YES> DEBUG=<NO|YES> 
