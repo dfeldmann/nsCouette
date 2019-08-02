@@ -24,7 +24,7 @@
 # provided in ARCH/make.arch.myPlatform. To build the nsCouette with different
 # configurations use the following command in the top level directory. When one
 # of the external variables is omitted, the default (first) value is used:
-# make ARCH=myPlatform CODE=<STD_CODE|TE_CODE> HDF5IO=<NO|YES> DEBUG=<NO|YES> 
+# make ARCH=myPlatform CODE=<STD_CODE|TE_CODE> HDF5IO=<no|yes> DEBUG=<no|yes> 
 #
 # Software requirements:
 # 1) Compiler: A modern Fortran compiler which is OpenMP-3 compliant and
@@ -45,7 +45,7 @@
 # 5) Optional data output: An MPI-parallel HDF5 library installation. Tested
 #    with 1.8.9, 1.10.0-patch1. Point environment variable $HDF5_HOME to an
 #    suitable HDF5 installation or switch data output off by setting the
-#    external variable: make HDF5IO=NO. For free software see:
+#    external variable: make HDF5IO=no. For free software see:
 #    http://www.hdfgroup.org/HDF5/
 
 #defaults for external variables 
