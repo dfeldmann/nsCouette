@@ -1,61 +1,68 @@
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! This file is part of NSCouette, a HPC code for DNS of Taylor-Couette flow !
-!                                                                           !
-! Copyright (C) 2016 Marc Avila, Bjoern Hof, Jose Manuel Lopez,             !
-!                    Markus Rampp, Liang Shi                                !
-!                                                                           !
-! NSCouette is free software: you can redistribute it and/or modify         !
-! it under the terms of the GNU General Public License as published by      !
-! the Free Software Foundation, either version 3 of the License, or         !
-! (at your option) any later version.                                       !
-!                                                                           !
-! NSCouette is distributed in the hope that it will be useful,              !
-! but WITHOUT ANY WARRANTY; without even the implied warranty of            !
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             !
-! GNU General Public License for more details.                              !
-!                                                                           !
-! You should have received a copy of the GNU General Public License         !
-! along with NSCouette.  If not, see <http://www.gnu.org/licenses/>.        !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! This file is part of nsCouette -- A high-performance code for direct         !
+! numerical simulations of turbulent Taylor-Couette flow                       !
+!                                                                              !
+! Copyright (C) 2019 Marc Avila, Bjoern Hof, Jose Manuel Lopez, Markus Rampp,  !
+!                    Liang Shi, Alberto Vela-Martin, Daniel Feldmann.          !
+!                                                                              !
+! nsCouette is free software: you can redistribute it and/or modify it under   !
+! the terms of the GNU General Public License as published by the Free         !
+! Software Foundation, either version 3 of the License, or (at your option)    !
+! any later version.                                                           !
+!                                                                              !
+! nsCouette is distributed in the hope that it will be useful, but WITHOUT ANY !
+! WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    !
+! FOR A PARTICULAR PURPOSE. See the GNU General Public License for more        !
+! details.                                                                     !
+!                                                                              !
+! You should have received a copy of the GNU General Public License along with !
+! nsCouette. If not, see <http://www.gnu.org/licenses/>.                       !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! A hybrid MPI-OpenMP direct numercial simulation code for Taylor-Couette flow
-! written in modern Fortran.
-!                                                                                          
-! + Cylindrical coordinate system (r, theta, z)                                                        
+program nscouette
+! nsCouette -- A high-performance for direct numercial simulations of turbulent
+! Taylor-Couette flow written in modern Fortran.
+! + Cylindrical coordinate system (r, theta, z)
 ! + Primitive flow field variables: Velocity (u_r, u_theta, u_z), pressure (p),
 !   and optionally temperature (T).
 ! + Spatial approximation: Finite differences in r and Fourier-Galerkin ansatz
 !   in theta and z direction
-! + Temporal approximation: Predictor-corrector scheme as in openpipeflow.org
+! + Temporal approximation: Predictor-corrector scheme with dynamic time
+!   stepping as in openpipeflow.org
 ! + Nonlinear term: Pseudospectral technique
-! + Parallelisation: Broadcast the Fourier modes into n MPI tasks with several                                        
-!   OpenMP threads inside each MPI task
+! + Hybrid parallelisation strategy: Standard one-dimensional slab decomposition
+!   into Fourier modes (in theta and z), which can be treated independently of
+!   each other in the solution of the linear terms. Multiple cores per MPI task
+!   can be used to compute the linear therms with multiple OpenMP threads inside
+!   each MPI task. To compute the non-linear terms, global data transpositions
+!   based on MPI_Alltoall and task-local transposes are employed for gathering
+!   all Fourier modes locally on each MPI task.
 !                                                                                          
-! Co-developed by Markus Rampp and Liang Shi (2011-2014). Early versions by
-! Liang Shi. Hybrid parallelisation and optimisation by Markus Rampp.
-! Time-stepper and other improvements by Jose Manuel Lopez (2016).
+! Early versions by Liang Shi. Co-developed by Markus Rampp and Liang Shi (2011-
+! 2014). Hybrid parallelisation and optimisation by Markus Rampp. Time-stepper
+! and other improvements by Jose Manuel Lopez (2016). GPU version by Alberto
+! Vela-Martin (2018). Minor improvements, Documentation, tutorials by Daniel
+! Feldmann (2019).
 !                                                                                          
-! Please cite:                                                                             
-! [1] Jose Manuel Lopez, Liang Shi, Markus Rampp, Alberto Vela-Martin, Daniel
-!     Feldmann & Marc Avila. nsCouette -- A high-performance code for direct
+! Please cite:
+! [1] Jose Manuel Lopez, Daniel Feldmann, Markus Rampp, Alberto Vela-Martin,
+!     Liang Shi & Marc Avila. nsCouette -- A high-performance code for direct
 !     numerical simulations of turbulent Taylor-Couette flow. SoftwareX, xxx,
 !     p. xx-xx, 2019.
-! [2] Liang Shi, Markus Rampp, Björn Hof & Marc Avila. A hybrid MPI-OpenMP
+! [2] Liang Shi, Markus Rampp, Bjoern Hof & Marc Avila. A hybrid MPI-OpenMP
 !     parallel implementation for pseudospectral simulations with application to
 !     Taylor-Couette flow. Computers & Fluids, 106, p. 1-11, 2015.
 
-program nscouette
+use mod_getcpu
+use mod_timestep
+use mod_params
+use mod_mympi
+use mod_vars
+use mod_nonlinear
+use mod_inout
+use wctimerclass
 
-  use mod_getcpu
-  use mod_timestep
-  use mod_params
-  use mod_mympi
-  use mod_vars
-  use mod_nonlinear
-  use mod_inout
-  use wctimerclass
-  
-  implicit none
+implicit none
 
   TYPE(WCTimer) :: tstepTimer,jobTimer
 

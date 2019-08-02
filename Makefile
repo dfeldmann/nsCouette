@@ -1,61 +1,52 @@
-###################################################################################
-# NSCOUETTE by Jose Manuel Lopez (PPE formulation), Liang Shi, et al.
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# This file is part of nsCouette -- A high-performance code for direct         !
+# numerical simulations of turbulent Taylor-Couette flow                       !
+#                                                                              !
+# Copyright (C) 2019 Marc Avila, Bjoern Hof, Jose Manuel Lopez, Markus Rampp,  !
+#                    Liang Shi, Alberto Vela-Martin, Daniel Feldmann.          !
+#                                                                              !
+# nsCouette is free software: you can redistribute it and/or modify it under   !
+# the terms of the GNU General Public License as published by the Free         !
+# Software Foundation, either version 3 of the License, or (at your option)    !
+# any later version.                                                           !
+#                                                                              !
+# nsCouette is distributed in the hope that it will be useful, but WITHOUT ANY !
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    !
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more        !
+# details.                                                                     !
+#                                                                              !
+# You should have received a copy of the GNU General Public License along with !
+# nsCouette. If not, see <http://www.gnu.org/licenses/>.                       !
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+# Makefile for a standard x86_64 Linux software stack with Intel, GNU or PGI
+# compilers. DO NOT CHANGE! A number of platform-specific configurations are
+# provided in ARCH/make.arch.myPlatform. To build the nsCouette with different
+# configurations use the following command in the top level directory. When one
+# of the external variables is omitted, the default (first) value is used:
+# make ARCH=myPlatform CODE=<STD_CODE|TE_CODE> HDF5IO=<NO|YES> DEBUG=<NO|YES> 
 #
-# Please cite:  
-#   A hybrid MPI-OpenMP parallel implementation for pseudospectral 
-#   simulations with application to Taylor-Couette flow
-#   Shi, L.; Rampp, M.; Hof, B.; Avila, M. 
-#   Computers & Fluids, 106, 1-11 (2015)   
-#   (arXiv:1311.2481) 
-#
-###################################################################################
-#
-# Makefile for a standard x86_64 Linux software stack with Intel/GNU/PGI compilers:
-#  a number of platform-specific configurations are provided in ARCH/make.arch.*
-#
-# requirements:
-#
-#  1) Compiler: a modern Fortran compiler which is OpenMP 3 compliant
-#               and additionally a corresponding C-compiler
-#               (tested with ifort/icc 12-15 or later, GCC 4.7-4.9, PGI 14)
-#     -> select with: make COMPILER=[Intel|GNU|PGI] 
-#
-#     for free software see: 
-#        https://gcc.gnu.org/
-#
-#  2) MPI: an MPI library which supports thread-level MPI_THREAD_SERIALIZED 
-#          (tested with Intel MPI 4.1 and higher, IBM PE 1.3 and higher)
-#     -> adapt MPIFC, CC (names of the MPI compiler wrappers in Makefile) 
-#
-#     for free software see: 
-#        http://www.open-mpi.de/
-#
-#  3) BLAS/LAPACK: a serial BLAS/LAPACK library
-#                  (tested with Intel MKL 11.x, OpenBLAS 0.2.14)
-#      -> adapt LIBLA and/or point environment variable $MKLROOT to a MKL installation 
-#
-#      for free software see: 
-#        http://www.openblas.net/
-#        http://math-atlas.sourceforge.net/
-#        http://www.netlib.org/    (reference implementations)
-#           
-#  4) FFTW: a serial but fully thread-safe fftw3 installation or equivalent 
-#           (tested with fftw 3.3 and MKL 11.1, earlier MKL versions will likely fail)
-#      -> point environment variable $FFTW_HOME to a FFTW3 installation 
-#      -> alternative: select  make FFTLIB=MKL (requires MKL 11.1 or later) 
-#
-#      for free software see: 
-#        http://www.fftw.org 
-#    
-#  5) HDF5: an MPI-parallel HDF5 library installation
-#           (tested with 1.8.9)
-#      -> point environment variable $HDF5_HOME to an MPI-parallel HDF5 installation 
-#      -> alternative: switch data output off with: make HDF5IO=no
-#
-#      for free software see: 
-#        http://www.hdfgroup.org/HDF5/
-#
-#############################################################################
+# Software requirements:
+# 1) Compiler: A modern Fortran compiler which is OpenMP-3 compliant and
+#    additionally a corresponding C-compiler (for houskeeping tasks). Tested
+#    with ifort/icc 12-15 or later, GCC 4.7-4.9, PGI 14. For free software see:
+#    https://gcc.gnu.org/
+# 2) MPI: An MPI library which supports thread-level MPI_THREAD_SERIALIZED.
+#    Tested with Intel MPI 4.1 and higher, IBM PE 1.3 and higher). For free
+#    software see: http://www.open-mpi.de/
+# 3) Linear algebra: A serial BLAS/LAPACK library. Tested with Intel MKL 11.x,
+#    OpenBLAS 0.2.14). Adapt $LIBLA and/or point environment variable $MKLROOT
+#    to an MKL installation. For free software see: http://www.openblas.net/
+#    http://math-atlas.sourceforge.net/ http://www.netlib.org/
+# 4) Fourier transforms: A serial but fully thread-safe FFTW3 installation or
+#    equivalent. Tested with FFTW 3.3 and MKL 11.1, earlier MKL versions will
+#    likely fail. Point environment variable $FFTW_HOME to a FFTW3 installation
+#    or select MKL (11.1 or later). For free software see: http://www.fftw.org 
+# 5) Optional data output: An MPI-parallel HDF5 library installation. Tested
+#    with 1.8.9, 1.10.0-patch1. Point environment variable $HDF5_HOME to an
+#    suitable HDF5 installation or switch data output off by setting the
+#    external variable: make HDF5IO=NO. For free software see:
+#    http://www.hdfgroup.org/HDF5/
 
 #defaults for external variables 
 ARCH     ?= intel-mkl

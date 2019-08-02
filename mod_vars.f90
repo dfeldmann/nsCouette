@@ -1,38 +1,34 @@
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! This file is part of NSCouette, a HPC code for DNS of Taylor-Couette flow !
-!                                                                           !
-! Copyright (C) 2016 Marc Avila, Bjoern Hof, Jose Manuel Lopez,             !
-!                    Markus Rampp, Liang Shi                                !
-!                                                                           !
-! NSCouette is free software: you can redistribute it and/or modify         !
-! it under the terms of the GNU General Public License as published by      !
-! the Free Software Foundation, either version 3 of the License, or         !
-! (at your option) any later version.                                       !
-!                                                                           !
-! NSCouette is distributed in the hope that it will be useful,              !
-! but WITHOUT ANY WARRANTY; without even the implied warranty of            !
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             !
-! GNU General Public License for more details.                              !
-!                                                                           !
-! You should have received a copy of the GNU General Public License         !
-! along with NSCouette.  If not, see <http://www.gnu.org/licenses/>.        !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! This file is part of nsCouette -- A high-performance code for direct         !
+! numerical simulations of turbulent Taylor-Couette flow                       !
+!                                                                              !
+! Copyright (C) 2019 Marc Avila, Bjoern Hof, Jose Manuel Lopez, Markus Rampp,  !
+!                    Liang Shi, Alberto Vela-Martin, Daniel Feldmann.          !
+!                                                                              !
+! nsCouette is free software: you can redistribute it and/or modify it under   !
+! the terms of the GNU General Public License as published by the Free         !
+! Software Foundation, either version 3 of the License, or (at your option)    !
+! any later version.                                                           !
+!                                                                              !
+! nsCouette is distributed in the hope that it will be useful, but WITHOUT ANY !
+! WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    !
+! FOR A PARTICULAR PURPOSE. See the GNU General Public License for more        !
+! details.                                                                     !
+!                                                                              !
+! You should have received a copy of the GNU General Public License along with !
+! nsCouette. If not, see <http://www.gnu.org/licenses/>.                       !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!=============================================
-!
-!     define global variables & types
-!
-!=============================================
+module mod_vars
+! define global variables & types
 
-MODULE mod_vars
-  
-  USE mod_fftw
-  USE mod_params
-  USE mpi
-  IMPLICIT NONE
-  SAVE
+use mod_fftw
+use mod_params
+use mpi
+implicit none
+save
 
-  private :: alloc_vec_mpi,dealloc_vec_mpi,alloc_vec_r2d,dealloc_vec_r2d
+private :: alloc_vec_mpi,dealloc_vec_mpi,alloc_vec_r2d,dealloc_vec_r2d
 
   !------------------------------------Derived Types
 

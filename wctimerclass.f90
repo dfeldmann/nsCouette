@@ -18,29 +18,22 @@
 ! along with NSCouette.  If not, see <http://www.gnu.org/licenses/>.        !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!////////////////////////////////////////////////////////////////////////
+module wctimerclass 
+! Defines a class for timing Fortran program  execution
+! Based on FTTimerClass.f90 by NocturnalAviationSoftware 
 !
-!      Defines a class for timing Fortran program  execution
-!
-!      Based on FTTimerClass.f90 by NocturnalAviationSoftware 
-!
-!      Original code downloaded by mjr 2017-10-19 from 
-!      http://www.nocturnalaviationsoftware.com/blog/using-type-bound-procedures.html
-!      the webpages says: "... You can download the source code for the Class here. You are free to use it as you like."
-!
-!      exchanged (largely useless) cpu_time measurement by a wall_clock timer + further adaptations
-!      
-!      Usage
-!
-!         * Starting the timer: CALL timer%start()
-!         * Stopping the timer: CALL timer%stop()
-!         * Reading the time:   time = timer%elapsedTime([units])
-!             units (optional) = TC_SECONDS or TC_MINUTES or TC_HOURS
-!             timer%elapsedTime() does not stop the timer
-!
-!////////////////////////////////////////////////////////////////////////
+! Original code downloaded by mjr 2017-10-19 from 
+! http://www.nocturnalaviationsoftware.com/blog/using-type-bound-procedures.html
+! the webpages says: "... You can download the source code for the Class here.
+! You are free to use it as you like."
+! exchanged (largely useless) cpu_time measurement by a wall_clock timer + further adaptations
+! Usage
+! * Starting the timer: CALL timer%start()
+! * Stopping the timer: CALL timer%stop()
+! * Reading the time:   time = timer%elapsedTime([units])
+!   units (optional) = TC_SECONDS or TC_MINUTES or TC_HOURS
+!   timer%elapsedTime() does not stop the timer
 
-      MODULE WCTimerClass 
       IMPLICIT NONE
       PRIVATE
 

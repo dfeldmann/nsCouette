@@ -18,8 +18,7 @@
 ! along with NSCouette.  If not, see <http://www.gnu.org/licenses/>.        !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!===========================================================================              
-! TIME STEP                                                                               
+module mod_timestep
 ! Time splitting scheme based on a predictor-corrector method                             
 ! Influence matrices are used to impose the boundary conditions                           
 ! For further details see documentation of openpipeflow.org                               
@@ -32,11 +31,6 @@
 ! Linear equations                                                                        
 !      (A*x=b)                                                                            
 !      are solved by LU decomposition method and in spectral space                        
-!                                                                                         
-!===========================================================================              
-
-
-MODULE mod_timeStep
 
   USE mod_inOut
 
