@@ -4,8 +4,8 @@ Our DNS code nsCouette is a highly scalable software tool to solve the Navier-St
 
 ## Build status and test coverage
 
-[![Build status](https://gitlab.mpcdf.mpg.de/mjr/nscouette/badges/nsCouette-1.0/build.svg)](https://gitlab.mpcdf.mpg.de/mjr/nscouette/commits/nsCouette-1.0)
-[![Code coverage](https://gitlab.mpcdf.mpg.de/mjr/nscouette/badges/nsCouette-1.0/coverage.svg)](http://mjr.pages.mpcdf.de/nscouette/) 
+[![Build status](https://gitlab.mpcdf.mpg.de/mjr/nscouette/badges/master/build.svg)](https://gitlab.mpcdf.mpg.de/mjr/nscouette/commits/master)
+[![Code coverage](https://gitlab.mpcdf.mpg.de/mjr/nscouette/badges/master/coverage.svg)](http://mjr.pages.mpcdf.de/nscouette/) 
 
 ## Installation
 
@@ -25,10 +25,10 @@ To build the executable, a Makefile for a standard x86_64 Linux software stack w
 ls ARCH/make.arch.*
 
 # Build the code (e.g. with Intel compilers and MKL)
-make ARCH=intel-mkl
+make ARCH=intel-mkl HDF5IO=no
 
 # Build the code (more build options)
-make ARCH=myPlatform CODE=<STD_CODE|TE_CODE> HDF5IO=<NO|YES> DEBUG=<NO|YES> 
+make ARCH=myPlatform CODE=<STD_CODE|TE_CODE> HDF5IO=<no|yes> DEBUG=<no|yes> 
 
 # Build the user guide (requires pdflatex)
 make doc
