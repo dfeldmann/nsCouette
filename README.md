@@ -96,7 +96,7 @@ Specific contribution is described below:
 
 * If you use nsCouette, please cite
 
-  Jose M. Lopez, Daniel Feldmann, Markus Rampp, Alberto Vela-Martin, Liang Shi, Marc Avila, nsCouette - A high-performance code for direct numerical simulations of turbulent Taylor-Couette flow, preprint: []()
+  Jose M. Lopez, Daniel Feldmann, Markus Rampp, Alberto Vela-Martin, Liang Shi, Marc Avila, nsCouette - A high-performance code for direct numerical simulations of turbulent Taylor-Couette flow, preprint: [arXiv:1908.00587](https://arxiv.org/abs/1908.00587)
 
 * For the methodology, implementation and validation, please refer to 
   
