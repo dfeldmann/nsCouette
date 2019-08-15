@@ -1172,32 +1172,15 @@ pull-down menu select the type of you want to plot, \textit{e.g.}, ``contour'' o
   \item  Play with the plot and carefully observe the change after each operation;
 \end{itemize} 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \section{About the code}
 \label{sec:aboutTheCode}
 
-In this section, the code is further documented on a programming level; i.e. structure,
-data types, variables, parallelisation etc. Additionally, some details on selected
-methodological aspects are outlined.
+In this section, the code is further documented on a programming level;
+i.e. structure, data types, variables, parallelisation etc. Additionally,
+some details on selected methodological aspects are outlined. Further
+technical documentation of the source code -- auto-generated with the
+\code{FORD} tool -- can be found
+\href{http://mjr.pages.mpcdf.de/nscouette/ford-doc/}{here}.
 
 \subsection{Structure of the source code}
 \label{sec:codeStructures}
@@ -1305,45 +1288,51 @@ see section~\ref{sec:}
 
 \end{itemize}
 
-\subsection{Features for thermal convection}
+\subsection{Feature for thermal convection}
 \label{sec:thermalConvection}
 
-The user can switch to \nsc with temperature by setting CODE ?= TE\_CODE
-in the Makefile. Alternatively, it can also be specifed when the code is built up
+You can easily switch to the optional temperature version of \nsc by simply
+setting the external variable \code{CODE=TE\_CODE} when building the code.
+Note, that the standard version of \nsc~-- i.e. without the additional
+temperature equation -- is set by default (\code{CODE=STD\_CODE}), see also
+section~\ref{sec:compileTimeOptions}.
+\begin{lstlisting}[language=bash]
+feldmann@darkstar:~/nsCouette/nsCouette$ make ARCH=myPlatform clean
+feldmann@darkstar:~/nsCouette/nsCouette$ make ARCH=myPlatform HDF5IO=no CODE=TE_CODE
+\end{lstlisting}
+\par
+The equation for the temperature ($T$) is coupled to the Navier--Stokes
+equations by considering a Boussinesq-like approximation that includes
+centrifugal buoyancy effects. Details about the dimensionless governing
+equations and the Boussinesq-like approximation are documented in Lopez
+et al.~\cite{Lopez2013}. Now, the code produces additional output. For
+details also see section~\ref{sec:output}). The file \code{Nusselt}
+contains time series of the normalised heat transfer at the inner and
+outer cylinders walls and the file \code{Temp\_energy} contains time
+series of the modal energy related to the temperature field. Time series
+of the temperature at the some user specified probe locations do now
+appear in the files \code{probes*.dat}. The snapshot flow field files
+(\code{coeff\_*} and \code{fields*.h5}) now also contain full information
+about the instantaneous temperature field.
+\par
+In the provided version of \nsc, the flow is stratified radially by
+heating the inner cylinder and cooling the outer cylinder, i.e. a
+negative radial temperature gradient $\sfrac{\partial T}{\partial r}$.
 
-\verb+make ARCH=myplatform HDF5IO=<yes|no> CODE=TE_CODE+
+\subsubsection{How to modify the source code}
 
-\noindent Note that the version without temperature (STD\_CODE) is set by default.
+The sense of the temperature gradient can be easily modified by inverting
+the boundary conditions for the temperature in the file \code{mod\_timeStep.f90}
+and modifying the temperature and axial velocity of the base flow accordingly
+in the \code{subroutine base\_flow} contained in the file \code{mod\_InOut.f90}.
+\begin{lstlisting}[language=Fortran]
+! Boundary conditions for mode 0 (prescribed temperature at the cylinders)  
+if (abs(fk_mp%th(1,k)) <= epsilon .and. abs(fk_mp%z(1,k)) <= epsilon) then  
+ rhs_p(1)   = dcmplx( 0.5d0, 0d0) 
+ rhs_p(m_r) = dcmplx(-0.5d0, 0d0) 
+end if
+\end{lstlisting}
 
-\noindent In the version of \nsc provided the flow is stratified
-radially by heating the inner cylinder and cooling the
-outer cylinder, i.e. a negative temperature gradient.
-The sense of the temperature gradient can be easily
-modified by inverting the boundary conditions for
-the temperature in mod\_timeStep.f90
-\begin{verbatim}   
-  ! Boundary conditions for mode 0 (prescribed temperature at the cylinders)  
-  IF (ABS(fk_mp%th(1,k)) <= epsilon .AND. ABS(fk_mp%z(1,k)) <= epsilon) THEN  
-  rhs_p(1) = dcmplx(0.5d0,0d0) 
-  rhs_p(m_r) = dcmplx(-0.5d0,0d0) 
-  end IF  
-\end{verbatim}
-\noindent and modifiying the temperature and axial velocity of the base flow
-accordingly in the subroutine base\_flow contained in mod\_InOut.f90.
-
-\noindent The temperature is coupled to the Navier-Stokes equations by considering a
-Boussinesq-like approximation that includes centrifugal buoyancy
-effects. The dimensionless governing equations and
-Boussinesq-like appproximation implemented can be found
-in Journal of Fluid Mechanics,Volume 73, December 2013, pp. 56-77.
-
-\noindent The code produces two additional time series outputs.
-The \verb+Nusselt+ file contains time series for the Nusselt number
-at the inner and outer cylinders, whereas the file \code{Temp\_energy}
-includes the temporal variation\dots
-
-Time series of the temperature at the some user specified probe locations do now appear
-in the files \code{probes*.dat}.
 
 
 

@@ -1,0 +1,55 @@
+\select@language {UKenglish}
+\contentsline {section}{\numberline {1}About Taylor-Couette}{2}{section.1}
+\contentsline {subsection}{\numberline {1.1}Governing equations}{3}{subsection.1.1}
+\contentsline {subsection}{\numberline {1.2}Control parameters and non-dimensional description}{3}{subsection.1.2}
+\contentsline {section}{\numberline {2}Building the code}{5}{section.2}
+\contentsline {subsection}{\numberline {2.1}Hardware prerequisites}{5}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Software prerequisites}{5}{subsection.2.2}
+\contentsline {subsubsection}{\numberline {2.2.1}Compiler}{5}{subsubsection.2.2.1}
+\contentsline {subsubsection}{\numberline {2.2.2}Message passing interface}{6}{subsubsection.2.2.2}
+\contentsline {subsubsection}{\numberline {2.2.3}Linear algebra}{6}{subsubsection.2.2.3}
+\contentsline {subsubsection}{\numberline {2.2.4}Fastest Fourier transform in the west}{6}{subsubsection.2.2.4}
+\contentsline {subsubsection}{\numberline {2.2.5}Hierarchical data format}{7}{subsubsection.2.2.5}
+\contentsline {subsubsection}{\numberline {2.2.6}Software modules}{7}{subsubsection.2.2.6}
+\contentsline {subsubsection}{\numberline {2.2.7}Self-build libraries}{7}{subsubsection.2.2.7}
+\contentsline {subsection}{\numberline {2.3}Download the source files}{8}{subsection.2.3}
+\contentsline {subsection}{\numberline {2.4}Compile the code}{8}{subsection.2.4}
+\contentsline {subsubsection}{\numberline {2.4.1}Makefile settings}{9}{subsubsection.2.4.1}
+\contentsline {subsubsection}{\numberline {2.4.2}Compile-time options}{10}{subsubsection.2.4.2}
+\contentsline {section}{\numberline {3}Running the code}{10}{section.3}
+\contentsline {subsection}{\numberline {3.1}Parameter input file}{11}{subsection.3.1}
+\contentsline {subsubsection}{\numberline {3.1.1}Control the time stepper}{12}{subsubsection.3.1.1}
+\contentsline {subsubsection}{\numberline {3.1.2}Setting boundary conditions}{13}{subsubsection.3.1.2}
+\contentsline {subsubsection}{\numberline {3.1.3}Choosing initial conditions}{13}{subsubsection.3.1.3}
+\contentsline {subsection}{\numberline {3.2}On your laptop/desktop}{15}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}On a cluster}{15}{subsection.3.3}
+\contentsline {paragraph}{\nonumberline Notes on runtime settings for hybrid MPI/OpenMP}{15}{section*.4}
+\contentsline {subsection}{\numberline {3.4}Output}{16}{subsection.3.4}
+\contentsline {subsubsection}{\numberline {3.4.1}Time series data}{16}{subsubsection.3.4.1}
+\contentsline {subsubsection}{\numberline {3.4.2}Fourier space velocity field coefficients}{17}{subsubsection.3.4.2}
+\contentsline {subsubsection}{\numberline {3.4.3}Physical space flow field data}{17}{subsubsection.3.4.3}
+\contentsline {subsection}{\numberline {3.5}Checkpoint-restart mechanism}{18}{subsection.3.5}
+\contentsline {section}{\numberline {4}Post-processing}{19}{section.4}
+\contentsline {subsection}{\numberline {4.1}Visualisation with \texttt {\textbf {ParaView}}}{19}{subsection.4.1}
+\contentsline {paragraph}{\nonumberline Preparation}{19}{section*.6}
+\contentsline {paragraph}{\nonumberline Loading flow field data}{20}{section*.7}
+\contentsline {paragraph}{\nonumberline Visualise flow field data}{21}{section*.9}
+\contentsline {subsection}{\numberline {4.2}Visualisation using \visit }{22}{subsection.4.2}
+\contentsline {section}{\numberline {5}About the code}{23}{section.5}
+\contentsline {subsection}{\numberline {5.1}Structure of the source code}{23}{subsection.5.1}
+\contentsline {subsection}{\numberline {5.2}Programme flow chart}{24}{subsection.5.2}
+\contentsline {subsection}{\numberline {5.3}Constants \& variables}{24}{subsection.5.3}
+\contentsline {subsection}{\numberline {5.4}Temporal discretisation}{24}{subsection.5.4}
+\contentsline {subsection}{\numberline {5.5}Feature for thermal convection}{25}{subsection.5.5}
+\contentsline {subsubsection}{\numberline {5.5.1}How to modify the source code}{25}{subsubsection.5.5.1}
+\contentsline {section}{\numberline {6}Tutorials}{26}{section.6}
+\contentsline {subsection}{\numberline {6.1}Prerequisites}{26}{subsection.6.1}
+\contentsline {subsection}{\numberline {6.2}Laminar Taylor-Couette flow in the stable regime}{26}{subsection.6.2}
+\contentsline {subsection}{\numberline {6.3}Taylor-vortex flow}{34}{subsection.6.3}
+\contentsline {subsection}{\numberline {6.4}Wavy vortex flow}{37}{subsection.6.4}
+\contentsline {subsection}{\numberline {6.5}Thermal convection}{37}{subsection.6.5}
+\contentsline {section}{\numberline {A}List of parameters}{39}{appendix.A}
+\contentsline {section}{\numberline {B}Configure and build additional software manually}{42}{appendix.B}
+\contentsline {subsection}{\numberline {B.1}Build \code {zlib}}{42}{subsection.B.1}
+\contentsline {subsection}{\numberline {B.2}Build \hdf }{44}{subsection.B.2}
+\contentsline {section}{\numberline {C}Useful notes to start working with \code {git}}{46}{appendix.C}
