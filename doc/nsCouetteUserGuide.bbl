@@ -1,0 +1,60 @@
+\begin{thebibliography}{10}
+
+\bibitem{Brandstater1983}
+A.~Brandst{\"{a}}ter, J.~Swift, H.~L. Swinney, A.~Wolf, J.~D. Farmer, E.~Jen,
+  and P.~J. Crutchfield.
+\newblock {Low-dimensional chaos in a hydrodynamic system}.
+\newblock {\em Physical Review Letters}, 51(16):1442--1445, 1983.
+
+\bibitem{Brandstater1987}
+A.~Brandst{\"{a}}ter and H.~L. Swinney.
+\newblock {Strange attractors in weakly turbulent Couette-Taylor flow}.
+\newblock {\em Physical Review A}, 35(5):2207--2220, 3 1987.
+
+\bibitem{Brauckmann2016}
+H.~J. Brauckmann, M.~Salewski, and B.~Eckhardt.
+\newblock {Momentum transport in Taylor-Couette flow with vanishing curvature}.
+\newblock {\em Journal of Fluid Mechanics}, 790:419--452, 2016.
+
+\bibitem{Dubrulle2005a}
+B.~Dubrulle, O.~Dauchot, F.~Daviaud, P.-Y. Longaretti, D.~Richard, and J.-P.
+  Zahn.
+\newblock {Stability and turbulent transport in Taylor–Couette flow from
+  analysis of experimental data}.
+\newblock {\em Physics of Fluids}, 17(9):095103, 9 2005.
+
+\bibitem{Howey2012}
+D.~A. Howey, P.~R.~N. Childs, and A.~S. Holmes.
+\newblock {Air-Gap Convection in Rotating Electrical Machines}.
+\newblock {\em IEEE Transactions on Industrial Electronics}, 59(3):1367--1375,
+  3 2012.
+
+\bibitem{Lopez2013}
+J.~M. Lopez, F.~Marques, and M.~Avila.
+\newblock {The Boussinesq approximation in rapidly rotating flows}.
+\newblock {\em Journal of Fluid Mechanics}, 737:56--77, 12 2013.
+
+\bibitem{Lopez2015}
+J.~M. Lopez, F.~Marques, and M.~Avila.
+\newblock {Conductive and convective heat transfer in fluid flows between
+  differentially heated and rotating cylinders}.
+\newblock {\em International Journal of Heat and Mass Transfer}, 90:959--967,
+  11 2015.
+
+\bibitem{Moreland2018}
+K.~Moreland.
+\newblock {The ParaView Tutorial}.
+\newblock {\em Technical Report SAND 2018-11803 TR}, Version 5., 2018.
+
+\bibitem{Shi2015}
+L.~Shi, M.~Rampp, B.~Hof, and M.~Avila.
+\newblock {A hybrid MPI-OpenMP parallel implementation for pseudospectral
+  simulations with application to Taylor–Couette flow}.
+\newblock {\em Computers {\&} Fluids}, 106:1--11, 1 2015.
+
+\bibitem{Willis2017}
+A.~P. Willis.
+\newblock {The Openpipeflow Navier–Stokes solver}.
+\newblock {\em SoftwareX}, 6:124--127, 2017.
+
+\end{thebibliography}
