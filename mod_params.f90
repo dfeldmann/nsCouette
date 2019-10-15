@@ -27,11 +27,14 @@ module mod_params
   implicit none
   save
 
+  !------------------------------------MPI error check
+  INTEGER(KIND=4) :: ierr
+  
   !------------------------------------Mathematics constants
   REAL(KIND=8)   ,PARAMETER :: epsilon = 1D-10      ! numbers below it = 0
   REAL(KIND=8)   ,PARAMETER :: PI = ACOS(-1d0)    ! pi = 3.1415926...
   COMPLEX(KIND=8),PARAMETER :: ii = DCMPLX(0,1)    ! Complex i = sqrt(-1)
-
+  
   !------------------------------------Spectral parametres
   INTEGER(KIND=4) :: m_r         ! Maximum spectral mode (> n_s-1)
   INTEGER(KIND=4) :: m_th    
@@ -58,7 +61,11 @@ module mod_params
   
   
   REAL(KIND=8), allocatable :: r(:),th(:),z(:)
-
+  
+  REAL(KIND=8) :: alpha = 0d0 !parameter to choose the distribution of radial nodes
+  !alpha can be chosen in the range 0 to 1, with alpha = 0d0  being a Chebyshev grid and
+  !alpha = 1d0  being a uniform grid.
+  
   ! some dimensional quantities for TE_CODE only
   real(kind=8) :: gap = 0.0d0 ! gap size in cm
   real(kind=8) :: gra = 0.0d0 ! gravitational acceleration in g/cm**3
@@ -135,7 +142,7 @@ subroutine init_grid
   implicit none
 
   integer :: ir
-
+  
   m_z = 2*m_z0
   m_f  = (m_th+1)*m_z ! Number of fouriers modes
 
@@ -154,7 +161,16 @@ subroutine init_grid
 
   allocate(r(n_r),th(n_th),z(n_z))
 
-  r(1:n_r) = (/(((r_i+r_o)/2 - COS(PI*ir/(n_r-1))/2), ir=0,(n_r-1))/)   ! Chebyshev-distributed nodes
+  if (alpha .eq. 0d0) then
+     r(1:n_r) = (/(((r_i+r_o)/2d0 - COS(PI*ir/(n_r-1))/2), ir=0,(n_r-1))/)   ! Chebyshev-distributed nodes
+     ierr = 0
+  elseif ((alpha .gt. 0d0) .and. (alpha .le. 1d0)) then
+     r(1:n_r) = (/(((r_i+r_o)/2d0 - asin(-alpha*cos(PI*ir/(n_r-1)))/(2d0*asin(alpha))), ir=0,(n_r-1))/)
+     ierr = 0
+  else
+     ierr = 1
+  end if
+     
   th(1:n_th) = (/(ir*len_th/n_th,ir=0,n_th-1)/)
   z(1:n_z) = (/(ir*len_z/n_z,ir=0,n_z-1)/)
 

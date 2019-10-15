@@ -53,7 +53,7 @@ implicit none
   TYPE(spec),ALLOCATABLE,DIMENSION(:,:) :: aux_hat_mp
   logical, private :: scale = .false. ! remap, scale, interpolate inital condition to specified grid if true
 
-  namelist /parameters_grid/ m_r,m_th,m_z0,k_th0,k_z0,eta
+  namelist /parameters_grid/ m_r,m_th,m_z0,k_th0,k_z0,eta,alpha
   namelist /parameters_physics/ re_i,re_o,gr,pr,gap,gra,nu
   namelist /parameters_timestep/ numsteps,init_dt,variable_dt,maxdt,courant
   namelist /parameters_output/ dn_coeff,dn_ke,dn_vel,dn_nu,dn_hdf5,print_time_screen,fbase_ic,dn_prbs,prl_r,prl_th,prl_z
@@ -119,6 +119,7 @@ call mpi_bcast(m_z0,1,mpi_integer,root,comm,ierr)
 call mpi_bcast(k_th0,1,mpi_real8,root,comm,ierr)
 call mpi_bcast(k_z0,1,mpi_real8,root,comm,ierr)
 call mpi_bcast(eta,1,mpi_real8,root,comm,ierr)
+call mpi_bcast(alpha,1,mpi_real8,root,comm,ierr)
 call mpi_bcast(re_i,1,mpi_real8,root,comm,ierr)
 call mpi_bcast(re_o,1,mpi_real8,root,comm,ierr)
 call mpi_bcast(restart,1,mpi_integer,root,comm,ierr)

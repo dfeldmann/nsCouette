@@ -117,6 +117,15 @@ implicit none
   
   call read_pars()    ! read set of parameters from std in
   call init_grid()    ! initialise numerical grid
+
+  !Check that the grid has been properly defined
+  if (ierr .eq. 1) then
+     if (myid==root) PRINT*, 'Wrong value of alpha!'
+     if (myid==root) PRINT*, 'alpha must be a value between 0 and 1'
+     if (myid==root) PRINT*, 'The simulation will stop'
+     CALL MPI_ABORT(comm,10,ierr)
+  end if
+
   call init_mpidist() ! intitalise mpi distribution of data 
 
   ! set initial conditions

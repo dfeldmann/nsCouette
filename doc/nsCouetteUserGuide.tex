@@ -524,6 +524,7 @@ m_z0  = 16                   ! Axial Fourier modes     => 2*m_z0+1 grid points
 k_th0 = 6.0                  ! Fundamental wavenumber  => L_th = 2*pi/k_th0
 k_z0  = 2.6179938779914944d0 ! Fundamental wavenumber  => L_z  = 2*pi/k_z0
 eta   = 0.868d0              ! Radii aspect ratio
+alpha = 0d0                  ! Value from 0 to 1 to set the distribution of radial nodes => 0 (Chebyshev) ----- 1 (uniform)
 /
 
 &parameters_physics
@@ -625,6 +626,20 @@ steady state and want to calculate statistics or create output for movies and wh
 than you resume the simulation with a constant $\Delta t$, which you set to a nice even
 value (\code{init\_dt}) which fits your needs and is slightly below the minimum
 $\Delta t$ of what you observed during the transient phase.
+
+\subsubsection{Setting the radial grid}
+\label{sec:radial_grid}
+
+The radial distribution of nodes can be specified at runtime by modifying
+the \code{alpha} parameter ($\alpha$) included in the
+\code{parameters\_grid} list. The nodes are distributed as
+\begin{align*}
+  r_j = \frac{1+\eta}{2(1-\eta)} + \frac{asin(-\alpha cos(\pi j/(m_r-1)))}{2 asin(\alpha)},  j=0,...,m_r-1.
+\end{align*}
+Note that $\alpha$ must have a value between $0$ and $1$. For $\alpha = 1$, the nodes are uniformly
+distributed, whereas for $\alpha = 0$, a Chebyshev grid (quadratic clustering near the cylinders)
+is obtained. Radial grids whose behavior falls between Chebyshev and equispaced grids are
+obtained if intermediate values of $\alpha$ are chosen. 
 
 \subsubsection{Setting boundary conditions}
 \label{sec:boundaryConditions}

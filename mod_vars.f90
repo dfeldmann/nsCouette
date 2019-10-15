@@ -77,7 +77,7 @@ private :: alloc_vec_mpi,dealloc_vec_mpi,alloc_vec_r2d,dealloc_vec_r2d
   TYPE (vec_mpi)  :: udu_hat_mp
 
   !------------------------------------MPI variables
-  INTEGER(KIND=4) :: ierr, comm, numprocs, myid,counter
+  INTEGER(KIND=4) :: comm, numprocs, myid,counter
   INTEGER(KIND=4) :: double_complex,mpi_spec,filetype,filetype2
   INTEGER(KIND=4) :: tl_mpi           !available level of threaded MPI
   INTEGER(KIND=4) :: nomp = 1         !number of OpenMP threads
