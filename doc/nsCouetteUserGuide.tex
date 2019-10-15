@@ -60,6 +60,7 @@ concepts of the TC system as well as with the notation we will use throughout
 this documentation and in the source code of \nsc.
 
 \subsection{Governing equations}
+\label{subsec:gov_eq_TC}
 We consider a fluid with constant properties (density $\rho$ and kinematic
 viscosity $\nu$) confined between two concentric cylinders as shown in
 figure~\ref{fig:tc}.
@@ -641,7 +642,7 @@ eq.~(\ref{eq:reynoldsIO}).
 For the heat transfer version of \nsc, additional Dirichlet BC are imposed for the
 temperature field to model the isothermal cylinder walls. The temperature difference
 between the inner and outer cylinder wall can be controlled by choosing the desired
-Rayleigh number (i.e. setting values for the Grashof and the Prandtle number) in the
+Rayleigh number (i.e. setting values for the Grashof and the Prandtl numbers) in the
 same name list.
 
 \subsubsection{Choosing initial conditions}
@@ -793,6 +794,7 @@ case of problems, please consult your local IT support.
 
 
 \paragraph{Notes on runtime settings for hybrid MPI/OpenMP}
+
 The most critical performance issue when running the code in hybrid mode (i.e.\
 OpenMP enabled) can be an improper pinning of the MPI tasks and OpenMP threads to
 the CPU cores. We suggest basic settings above based on the \verb+OMP_PLACES+
@@ -1017,7 +1019,7 @@ perform a coordinate transformation for every state file you load into
 rendering of the flow field, since \code{ParaView} only knows Cartesian
 coordinates ($x, y, z$), whereas the flow field data in the \code{HDF5}
 output files is defined in a cylindrical coordinate system($r, z, \theta$),
-see section~\ref{sec:}. To add the  costum filter to the list of known filters
+see section~\ref{subsec:gov_eq_TC}. To add the  costum filter to the list of known filters
 do the following:
 \begin{enumerate}
 \item Launch \paraview
@@ -1132,16 +1134,10 @@ state file \code{vectorPlot.pvsm} which comes with the second
 tutorial described in section~\ref{sec:tc0041}.
 \end{itemize}
 
-
-
-
-
-
-
 \subsection{Visualisation using \visit}
 \label{sec:visit}
 As an alternative to \paraview (section~\ref{sec:paraview}), you can also use
-the open source software \visit (fig.~\ref{fig:visit}), to visualise and
+the open source software \visit (fig.~\ref{fig:VisIt}), to visualise and
 analyse the instantaneous flow field snapshots generated with \nsc.
 \begin{figure}[htb]
 \includegraphics[width=1.00\linewidth]{figures/visit.png}
@@ -1149,7 +1145,7 @@ analyse the instantaneous flow field snapshots generated with \nsc.
 of a pseudo-colour representation of the instantaneous pressure field in
 a small computational domain similar to the set-up used in the first
 tutorial in section~\ref{sec:tc0040}.}
-\label{fig:visit}
+\label{fig:VisIt}
 \end{figure}
 The following basic steps will give you a good starting point to learn
 how to read the \hdf files and how to render the containing flow field
@@ -1214,7 +1210,7 @@ Basically speaking, the programme flow of \nsc is as follows.
 \begin{enumerate}
 \item Initialisation phase: \mpi, read parameter file (section~\ref{sec:parameterInputFile}), set initial conditions (section~\ref{sec:initialConditions}) 
 \item Time-stepping: linear sub-step computation and nonlinear pseudo-computation)
-\item Finalising phase: \mpi, checkpoint output (section~\ref{sec:})
+\item Finalising phase: \mpi, checkpoint output (section~\ref{sec:checkpoint})
 \end{enumerate}
 
 
@@ -1267,10 +1263,8 @@ c N_j^{q+1} + \left(1-c\right)N^q + \left( \frac{1}{\delta t} -
 \end{align*}
 and the tolerance is set to \code{tolerance\_dterr = 5E-5} by default. If
 necessary, it can easily by changed by modifying the file \code{mod\_param.f90},
-see section~\ref{sec:}
 
   
-
 \item The coefficient $c$ (d\_implicit) defines the implicitness of the method and can be specified
   in mod\_params.f90. Note that the temporal scheme is second-order if c=0.5.
 
@@ -1293,7 +1287,7 @@ see section~\ref{sec:}
 
 You can easily switch to the optional temperature version of \nsc by simply
 setting the external variable \code{CODE=TE\_CODE} when building the code.
-Note, that the standard version of \nsc~-- i.e. without the additional
+Note that the standard version of \nsc~-- i.e. without the additional
 temperature equation -- is set by default (\code{CODE=STD\_CODE}), see also
 section~\ref{sec:compileTimeOptions}.
 \begin{lstlisting}[language=bash]
@@ -1306,7 +1300,7 @@ equations by considering a Boussinesq-like approximation that includes
 centrifugal buoyancy effects. Details about the dimensionless governing
 equations and the Boussinesq-like approximation are documented in Lopez
 et al.~\cite{Lopez2013}. Now, the code produces additional output. For
-details also see section~\ref{sec:output}). The file \code{Nusselt}
+details see also section~\ref{sec:output}). The file \code{Nusselt}
 contains time series of the normalised heat transfer at the inner and
 outer cylinders walls and the file \code{Temp\_energy} contains time
 series of the modal energy related to the temperature field. Time series
@@ -1321,6 +1315,7 @@ negative radial temperature gradient $\sfrac{\partial T}{\partial r}$.
 
 \subsubsection{How to modify the source code}
 
+
 The sense of the temperature gradient can be easily modified by inverting
 the boundary conditions for the temperature in the file \code{mod\_timeStep.f90}
 and modifying the temperature and axial velocity of the base flow accordingly
@@ -1332,8 +1327,6 @@ if (abs(fk_mp%th(1,k)) <= epsilon .and. abs(fk_mp%z(1,k)) <= epsilon) then
  rhs_p(m_r) = dcmplx(-0.5d0, 0d0) 
 end if
 \end{lstlisting}
-
-
 
 
 \section{Tutorials}
@@ -1891,8 +1884,8 @@ axial up (green) and down (yellow) wash. This well-known phenomenon is a so-call
 Taylor-Vortex (TV), which is more thoroughly discernible through the vector representation
 of the two cross-stream velocity components $u_{r}$ and $u_{z}$, which are also included
 in figure~\ref{fig:tc0041vectorPlot}. You can easily create such plot with \code{ParaView}
-by loading the corresponding \code{*.h5} file (Section \ref{sec:}), performing a coordinate
-transformation (Section \ref{sec:}) and playing around with the \code{contour},
+by loading the corresponding \code{*.h5} file (Section \ref{sec:iohdf5}), performing a coordinate
+transformation (Section \ref{sec:paraview}) and playing around with the \code{contour},
 \code{slice} and \code{glyph} filters. Loading the provided state file (\code{taylorVortexIsoContourVectorPlot.pvsm}) might also be helpful to learn creating such plots.
 \par
 The Taylor-Vortex state -- which is reached after a certain transient phase -- is
@@ -2147,13 +2140,7 @@ inwards (blue) and outwards (r) directed wall-normal (radial) velocity component
 \label{fig:compareGrass}
 \end{figure}
 
-
-
-
-
 \appendix
-
-
 
 \section{List of parameters}
 \label{sec:listOfParameters}
@@ -2237,22 +2224,6 @@ INTEGER(KIND=4) :: dn_hdf5 = 1000 ! Output HDF5 every nth step
 
 
  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \section{Configure and build additional software manually}
 \label{app:selfBuildLibraries}
 
@@ -2497,6 +2468,197 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/feldmann/hdf5/hdf5-1.10.0-patch1/l
 # Done!
 \end{lstlisting}
 
+
+\section{nspipe}
+\label{sec:nspipe}
+
+The code \nsp merges the numerical formulation
+of Openpipeflow~\cite{Willis2017}, an open source code to simulate
+pipe flow, with the hybrid parallel strategy of \nsc,
+creating a highly scalable solver to simulate pipe flow at large values of
+the Reynolds number. The source code structure of \nsp was
+conceived to follow that of \nsc as closely as possible. Both codes
+share the same hardware and software requirements (see
+sections~\ref{sec:hardwarePrerequisites} and~\ref{sec:softwarePrerequisites}).
+Likewise, \nsp can be compiled following the steps described
+in section~\ref{sec:compiler} (note that the executable obtained after compilation
+is in this case named \code{nsPipeFlow.x}). Also from a user perspective \nsp works
+in the same way as \verb+nsCouette+, and so the reader is encouraged to read in detail
+all sections in this user guide before using \nsp.
+Here, we will only briefly discuss those details that are specific to \nsp,
+with emphasis placed on I/O parameters or operations that differ with
+respect to \nsc.
+
+\subsection{Governing equations and parameters}
+\label{subsec:equations_parameters}
+
+We consider a fluid flowing through a straight circular pipe of constant cross section.
+Fluid motion is governed by the Navier-Stokes and continuity equations in
+cylindrical coordinates (eq.~\ref{eq:eq_pipe}). These are rendered dimensionaless by choosing the pipe
+radius ($R$), the centreline velocity of the laminar profile ($u_c$) and
+the dynamic pressure $\rho u_c^2$ as characteristic length, velocity and pressure
+scales, respectively. 
+\begin{align}
+  \nabla\cdot\vec{u} = 0
+  \hspace{1em}\text{and}\hspace{1em}
+  \frac{\partial\vec{u}}{\partial t} + \vec{u}\cdot\nabla\vec{u} =
+  \frac{\nabla p^{\ast}}{\rho} + \frac{1}{Re}\laplacian\vec{u} + F\hat{e}_z
+  \label{eq:eq_pipe}
+\end{align}
+ 
+The control parameter here is the dimensionless Reynolds number, $Re = \frac{u_c R}{\nu}$,
+which quantifies the ratio of inertial to viscous forces. If $Re$ is small ($\sim O(100)$)
+velocity fluctuations are damped by the viscous forces and the flow remains laminar.
+Unlike certain regimes of Taylor-Couette flow, where turbulence is achieved after the flow
+passes through a sequence of increasingly complex states, turbulence in pipes arises
+suddenly. i.e. the transition is subcritical. First observations of turbulence in pipe flow 
+can be made at $Re \approx 1850$ where localized turbulent patches known as puffs appear
+transiently. Other complex spatio-temporal dynamics such as puff splitting and
+turbulence spreading (``slugs'') are observed as $Re$ increases during the
+so called transitional regime ($2050 \lesssim Re \lesssim 2800$). Persistent
+space filling turbulence occurs eventually at $Re \gtrsim 3000$.\\ 
+
+The term $F\hat{e}_z$ in~\ref{eq:eq_pipe} denotes the volumetric force driving
+the fluid motion. There are two ways to drive motion in pipes.\\
+
+1. Pressure driven flow. A constant pressure gradient between inlet and outlet
+is imposed. Under this condition the wall shear stress is fixed but the
+bulk (average) velocity and therefore the Reynolds number
+will change throuhout the simulation.
+
+2. Flow rate driven flow. A constant flow rate is imposed,
+i.e. the bulk velocity is constant. Under this condition the Reynolds number
+is constant but the wall shear stress will fluctuate.\\
+
+Both approaches are implemented in \nsp.
+
+\subsection{Boundary conditions}
+\label{subsec:bcpipe}
+
+Equations~\ref{eq:eq_pipe} require of boundary conditions to be solved. In \nsp,
+periodic boundary conditions are imposed for both velocity and pressure in the streamwise
+and azimuthal directions. In the radial direction boundary conditions have to be imposed
+at the pole ($r=0$) and at the pipe wall ($r=R$). Since the equations in cylindrical
+coordinates are singular at the pole this must be excluded from the radial grid.
+The boundary closure is carried out by enforcing the proper symmetry of each azimuthal
+Fourier mode at $r=0$. That is, if for a given azimuthal Fourier mode $n$,
+a variable $X$ (pressure or velocity) is an even function in $r$, $X(r) = X(-r)$,
+its radial derivative must be zero at the pole, $\partial_r X = 0$. However, if $X$ is
+an odd function in $r$, $X(r) = -X(-r)$, the value of the variable at the pole must be zero,
+$X = 0$. The pressure and the streamwise velocity will be even functions if
+$n$ is even and odd functions otherwise. In contrast, the radial and azimuthal velocity
+components will be odd functions if $n$ is even and viceversa. At the pipe wall,
+no-slip boundary conditions are imposed for the velocity field and a homogeneous
+Neumann boundary condition is used for the pressure,
+\begin{align}
+  \vec{u}(r=R, \theta, z, t) =
+  \begin{bmatrix}
+    0 & 0 & 0
+  \end{bmatrix}^{\intercal},
+  \hspace{1em}\text{and}\hspace{1em}
+  \nabla p|_{wall} = 0
+  \label{eq:pipe_wallBC}
+\end{align}
+We recall here that our solver does not require solving the pressure formally as the velocity is later corrected to satisfy
+both no-slip and divergence free boundary condition using an influence matrix technique. 
+
+\subsection{Input file}
+\label{subsec:input_nspipe}
+
+As in \nsc the simulation control parameters are defined in an
+input file (named \code{nsPipeFlow.x}) which is
+read in the initial stage of the simulation. This feature allows
+users to modify the control parameters without the need of
+recompiling the code. An example of an input file for \nsp is
+given below. 
+\begin{lstlisting}[language=fortran]
+  &parameters_grid
+  m_r   = 32                ! radial points           => m_r      grid points (radial)
+  m_th  = 4                 ! azimuthal Fourier modes => 2*m_th+1 grid points (azimuthal)
+  m_z0  = 4                 ! axial Fourier modes     => 2*m_z0+1 grid points (axial)
+  k_th0 = 1.0d0             ! azimuthal wavenumber    => L_th = 2*pi/k_th0 azimuthal length of grid
+  k_z0  = 0.628318531d0     ! axial wavenumber        => L_z =  2*pi/k_z0  axial length of grid
+  /
+
+  &parameters_physics
+  Re = 100d0               ! Re
+  const_flux = T           ! T: constant flow rate; F: constant pressure gradient
+  /
+
+  &parameters_timestep
+  numsteps    = 20000     ! number of steps
+  init_dt     = 1.0d-4    ! initial size of timestep
+  variable_dt = T         ! use a variable (=T) or fixed (=F) timestep
+  maxdt       = 0.01      ! maximum size of timestep
+  Courant     = 0.25      ! CFL safety factor
+  /
+
+
+  &parameters_timestep
+  numsteps    = 20000     ! number of steps
+  init_dt     = 1.0d-4    ! initial size of timestep
+  variable_dt = T         ! use a variable (=T) or fixed (=F) timestep
+  maxdt       = 0.01      ! maximum size of timestep
+  Courant     = 0.25      ! CFL safety factor
+  /
+
+  &parameters_output
+  fBase_ic = 'DNS1'       ! identifier for coeff_ (checkpoint) and fields_ (hdf5) files
+  dn_coeff = 5000         ! output interval [steps] for coeff (dn_coeff = -1 disables ouput)
+  dn_ke    = 100          ! output interval [steps] for energy
+  dn_friction    = 100    ! output interval [steps] for friction parameters
+  dn_hdf5  = 1000         ! output interval [steps] for HDF5 output
+  print_time_screen = 100 ! output interval [steps] for timestep info to stdout
+  /
+
+  &parameters_control
+  restart = 0             ! initialization mode: 0=new run, 1=restart from checkpoint (keep time), 2=restart from checkpoint (set time=0 and create new output files)
+  runtime = 86400         ! maximum runtime [s] for the job
+  /
+\end{lstlisting}
+
+Note that there are several differences with respect to the input file  in \nsc
+(section~\ref{sec:parameterInputFile}). Since the physical mechanisms underlying
+the flow dynamics differ between Taylor-Couette and pipe flows, the
+\emph{parameter\_physics} namelist contain different parameters. In \nsp only two
+physical parameters are needed to set up a simulation: the Reynolds number (\code{Re}) and
+the force driving the fluid motion (\code{const\_flux}). The latter is a logical variable.
+If it is set as true (T), motion is driven by a constant mass flow rate. Otherwise,
+the flow is pressure driven. A new parameter \code{dn\_friction} appears in the
+\emph{parameters\_output} list. It indicates the frequency at which the output file named
+\code{friction} is updated. This file contains information about the bulk velocity or wall shear
+stress (depending on whether pressure driven or constant mass flow rate are chosen), centreline
+velocity of the mean velocity profile, friction velocity and friction factor. In addition to
+the \code{friction} file, a file containing the mean velocity profile (i.e. azimuthal and axially
+averaged streamwise velocity) is also produced every \code{dn\_coeff} steps. Note that the
+\code{dn\_probes} parameters,  used in \nsc to specify those physical locations at which time
+series of velocity (or temperature) are recorded, are absent in the current version of \nsp.
+This functionality will however be added in future releases. 
+
+
+\subsection{Initial condition}
+\label{subsec:initial_condition_pipe}
+
+As explained in section~\ref{sec:initialConditions} there exist three options to start
+the simulation and these can be specified in the input file using the \code{restart} parameter.
+When the initilization option \code{restart=0} is chosen, the simulation is started from
+the base flow (the classical Hagen-Poiseuille profile), which is perturbed during the
+initialization phase. The disturbances added to the base flow are implemented in the subroutine
+\code{pulse\_init} contained in the module \code{mod\_InOut}. By default,
+\nsp implements a pair of streamwise localized rolls ($v=A(g+rg') cos(\theta) e^{-wsin^2(\pi z/L_z)}$ and
+$u=A g sin(\theta) e^{-wsin^2(\pi z/L_z)}$, where $u$ and $v$ are the
+radial and azimuthal velocity components, $L_z$ is the pipe axial length,
+$r$,$\theta$ and $z$ are the three spatial directions in cylindrical
+coordinates, $w$ fixes the axial length of the perturbation,
+$g=(1-r^2)^2$,  and $A$ is the amplitude of the
+disturbance (set to $0.1$ by default). This perturbation is known to produce puffs at the
+transitional regime and turbulence at higher Reynolds numbers~\cite{Mellibovsky2009}.
+Nevertheless, the user may need to modify $A$ and $w$
+depending on the values of $Re$ and $L_z$ considered in the simulations.
+Unlike \nsc, the current implementation of \nsp does not allow
+to define these parameters in the input file. Hence, changes need
+to be done in the source code (\code{mod\_InOut.f90}) and the
+code must be subsequently compiled. 
 
 
 \section{Useful notes to start working with \code{git}}
