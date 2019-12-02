@@ -1,13 +1,26 @@
-%******************************************************************************%
-%**** les - report       ******************************************************%
-%**** 22nd februray 2017 ******************************************************%
-%**** daniel feldmann    ******************************************************%
-%**** pdflatex -> pdf    ******************************************************%
-%******************************************************************************%
-%
-%--- mandatory packages -------------------------------------------------------%
-\RequirePackage{xspace}                           % to get your spacing straight
-%------------------------------------------------------------------------------%
+%!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% This file is part of nsCouette -- A high-performance code for direct         !
+% numerical simulations of turbulent Taylor-Couette flow                       !
+%                                                                              !
+% Copyright (C) 2019 Marc Avila, Bjoern Hof, Jose Manuel Lopez, Markus Rampp,  !
+%                    Liang Shi, Alberto Vela-Martin, Daniel Feldmann.          !
+%                                                                              !
+% nsCouette is free software: you can redistribute it and/or modify it under   !
+% the terms of the GNU General Public License as published by the Free         !
+% Software Foundation, either version 3 of the License, or (at your option)    !
+% any later version.                                                           !
+%                                                                              !
+% nsCouette is distributed in the hope that it will be useful, but WITHOUT ANY !
+% WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    !
+% FOR A PARTICULAR PURPOSE. See the GNU General Public License for more        !
+% details.                                                                     !
+%                                                                              !
+% You should have received a copy of the GNU General Public License along with !
+% nsCouette. If not, see <http://www.gnu.org/licenses/>.                       !
+%!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+\RequirePackage{xspace} % to get your spacing straight
+
 %
 %--- special characters -------------------------------------------------------%
 % \DeclareRobustCommand{\increment}{\,d\!}
@@ -23,6 +36,7 @@
 \DeclareRobustCommand{\Nui}{\ensuremath{N\hspace{-0.1em}u_{i}}\xspace}
 \DeclareRobustCommand{\Nuomi}{\ensuremath{N\hspace{-0.1em}u_{\omega,i}}\xspace}
 \DeclareRobustCommand{\Nuomo}{\ensuremath{N\hspace{-0.1em}u_{\omega,o}}\xspace}
+\DeclareRobustCommand{\Rayleigh}{\ensuremath{R\hspace{-0.1em}a}\xspace}     % Rayleigh number
 \DeclareRobustCommand{\Reynolds}{\ensuremath{R\hspace{-0.1em}e}\xspace}     % Reynolds number
 \DeclareRobustCommand{\ReDelta}{\ensuremath{R\hspace{-0.1em}e_{\delta}}\xspace}
 \DeclareRobustCommand{\Rei}{\ensuremath{R\hspace{-0.1em}e_{i}}\xspace}
@@ -70,50 +84,64 @@
 % \renewcommand{\max}{m\!a\!x}
 \DeclareRobustCommand{\rms}{\ensuremath{R\!M\!S\!}}
 % \renewcommand{\sin}{sin\!}
-%------------------------------------------------------------------------------%
-%
-%--- vector operators ---------------------------------------------------------%
+
+%--- vector operators
+\RequirePackage{rotating} % provides sideways
 \renewcommand{\vec}{\boldsymbol}
-% \DeclareRobustCommand{\divergence}{\operatorname{div}} %{d\!i\!v\!}
-% \DeclareRobustCommand{\gradient}{\operatorname{grad}} %{g\!r\!a\!d}
+\DeclareRobustCommand{\divergence}{\operatorname{div}} %{d\!i\!v\!}
+\DeclareRobustCommand{\gradient}{\operatorname{grad}} %{g\!r\!a\!d}
 \DeclareRobustCommand{\laplacian}{\vec{\Delta}}
-\RequirePackage{rotating}                                    % provides sideways
-\renewcommand{\nabla}{\begin{sideways}\begin{sideways}$\laplacian$\end{sideways}\end{sideways}}
-%------------------------------------------------------------------------------%
-%
-%--- relations ----------------------------------------------------------------%
+\DeclareRobustCommand{\nabla}{\begin{sideways}\begin{sideways}$\laplacian$\end{sideways}\end{sideways}}
+
+%--- relations
 \DeclareRobustCommand{\constraint}{\stackrel{!}{=}}
-%------------------------------------------------------------------------------%
-%
+
+
 %--- statistical average delimiter --------------------------------------------%
 \DeclareRobustCommand{\lla}{\left\langle}
 \DeclareRobustCommand{\rra}{\right\rangle}
-%------------------------------------------------------------------------------%
-%
-%--- some names ---------------------------------------------------------------%
-\DeclareRobustCommand{\c}{\textbf{\texttt{C}}\xspace}
-\DeclareRobustCommand{\cuda}{\textbf{\texttt{CUDA}}\xspace}
-\DeclareRobustCommand{\flowsi}{\textbf{\texttt{flowsi}}\xspace}
-\DeclareRobustCommand{\fortran}{\textbf{\texttt{Fortran}}\xspace}
-\DeclareRobustCommand{\hdf}{\textbf{\texttt{HDF5}}\xspace}
-\DeclareRobustCommand{\nsc}{\texttt{\textbf{nsCouette}}\xspace}
-\DeclareRobustCommand{\nsp}{\texttt{\textbf{nsPipe}}\xspace}
-\DeclareRobustCommand{\of}{\textbf{\texttt{OpenFOAM}}\xspace}
-\DeclareRobustCommand{\opf}{\href{www.openpipeflow.org}{\textbf{\texttt{openpipeflow}}}\xspace}
-\DeclareRobustCommand{\mpi}{\textbf{\texttt{MPI}}\xspace}
-\DeclareRobustCommand{\omp}{\textbf{\texttt{OpenMP}}\xspace}
-\DeclareRobustCommand{\paraview}{\textbf{\texttt{ParaView}}\xspace}
-\DeclareRobustCommand{\visit}{\textbf{\texttt{VisIt}}\xspace}
 
-%------------------------------------------------------------------------------%
-%
+
+%--- some software names
+\RequirePackage{xspace}
 \DeclareRobustCommand{\code}[1]{\textbf{\texttt{\color{black}#1}}\xspace}
-%------------------------------------------------------------------------------%
-% \DeclareRobustCommand{\ie}{i.\,e.\,}
-% \DeclareRobustCommand{\Ie}{I.\,e.\,}
-% \DeclareRobustCommand{\eg}{e.\,g.\,}
-% \DeclareRobustCommand{\Eg}{E.\,g.\,}
-%------------------------------------------------------------------------------%
-%
-%
-%
+\DeclareRobustCommand{\c}{\href{https://en.wikipedia.org/wiki/C_(programming_language)}{\code{C}}\xspace}
+\DeclareRobustCommand{\cf}{\href{http://www.channelflow.org}{\code{channelflow.org}}}
+\DeclareRobustCommand{\cuda}{\href{https://en.wikipedia.org/wiki/CUDA}{\code{CUDA}}\xspace}
+\DeclareRobustCommand{\flowsi}{\code{flowsi}\xspace}
+\DeclareRobustCommand{\fortran}{\href{https://en.wikipedia.org/wiki/Fortran}{\code{Fortran}}\xspace}
+\DeclareRobustCommand{\gnuplot}{\href{http://www.gnuplot.info/}{\code{gnuplot}}\xspace}
+\DeclareRobustCommand{\hdf}{\href{https://en.wikipedia.org/wiki/Hierarchical_Data_Format}{\code{HDF5}}\xspace}
+\DeclareRobustCommand{\mpi}{\href{https://en.wikipedia.org/wiki/Message_Passing_Interface}{\code{MPI}}\xspace}
+\DeclareRobustCommand{\nsc}{\href{https://github.com/dfeldmann/nsCouette}{\code{nsCouette}}\xspace}
+\DeclareRobustCommand{\nsp}{\href{https://github.com/dfeldmann/nsCouette}{\code{nsPipe}}\xspace}
+\DeclareRobustCommand{\of}{\textbf{\texttt{OpenFOAM}}\xspace}
+\DeclareRobustCommand{\omp}{\href{https://en.wikipedia.org/wiki/OpenMP}{\code{OpenMP}}\xspace}
+\DeclareRobustCommand{\opf}{\href{www.openpipeflow.org}{\code{openpipeflow}}\xspace}
+\DeclareRobustCommand{\paraview}{\href{https://en.wikipedia.org/wiki/ParaView}{\code{ParaView}}\xspace}
+\DeclareRobustCommand{\plplot}{\href{http://plplot.sourceforge.net/}{\code{PLplot}}\xspace}
+\DeclareRobustCommand{\python}{\href{https://www.python.org/}{\code{Python}}\xspace}
+\DeclareRobustCommand{\sge}{\href{https://en.wikipedia.org/wiki/Oracle_Grid_Engine}{\code{SGE}}\xspace}
+\DeclareRobustCommand{\slurm}{\href{https://en.wikipedia.org/wiki/Slurm_Workload_Manager}{\code{slurm}}\xspace}
+\DeclareRobustCommand{\visit}{\href{https://en.wikipedia.org/wiki/VisIt}{\code{VisIt}}\xspace}
+\DeclareRobustCommand{\xmf}{\href{http://www.xdmf.org}{\code{xdmf}}\xspace}
+
+% \DeclareRobustCommand{\xmf}{\href{}{\code{}}\xspace}
+
+% hybrid scheme stuff
+\DeclareRobustCommand{\tpn}{\ensuremath{N_{\text{T/N}}}\xspace}
+\DeclareRobustCommand{\tpt}{\ensuremath{N_{\text{T/T}}}\xspace}
+\DeclareRobustCommand{\hyperthreading}{\href{https://en.wikipedia.org/wiki/Hyper-threading}{Hyper-threading}\xspace}
+
+
+
+% for draft stage only
+\RequirePackage{xcolor} % make it gay
+\RequirePackage{xspace} % to get your spacing straight
+\DeclareRobustCommand{\mod}[1]{\textcolor{red}{#1}\xspace}
+
+% common abbreviations 
+\DeclareRobustCommand{\ie}{i.\,e.\,}
+\DeclareRobustCommand{\Ie}{I.\,e.\,}
+\DeclareRobustCommand{\eg}{e.\,g.\,}
+\DeclareRobustCommand{\Eg}{E.\,g.\,}
