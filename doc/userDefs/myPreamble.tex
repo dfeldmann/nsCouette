@@ -19,32 +19,22 @@
 % nsCouette. If not, see <http://www.gnu.org/licenses/>.                       !
 %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+% fonts
+\RequirePackage{palatino}  % roman
+\RequirePackage{eulervm}   % math
 
-%--- fonts --------------------------------------------------------------------%
-% \RequirePackage{lmodern}                     % only to get rid of font size warnings
-\RequirePackage{palatino}
-% \RequirePackage{times}                                                     % roman
-% \RequirePackage{mathptmx}                      % selects Times Roman as basic font
-% \RequirePackage{helvet}                                               % sans serif
-% \RequirePackage{courier}                                              % typewriter
-\RequirePackage{eulervm}                                                   % math
-%------------------------------------------------------------------------------%
-%
-%--- font encoding ------------------------------------------------------------%
-\usepackage[T1]{fontenc}                                                % output
-\usepackage[utf8]{inputenc}                                              % input
-\RequirePackage{url}     % to avoid probs with special chars in email or web address
-%------------------------------------------------------------------------------%
-%
-%--- draft --------------------------------------------------------------------%
+% font encoding
+\usepackage[T1]{fontenc}    % output
+\usepackage[utf8]{inputenc} % input
+\RequirePackage{url}        % avoid probs with special chars in email or web address
+
+% draft stage
 \RequirePackage{layouts}
 \RequirePackage{blindtext}
-%------------------------------------------------------------------------------%
-%
-%--- language settings --------------------------------------------------------%
+
+% language settings
 \usepackage[UKenglish]{babel}
-%------------------------------------------------------------------------------%
-%
+
 %--- generally useful packages ------------------------------------------------%
 % \RequirePackage{textcomp}                     % fix warning with missing font shapes
 % \RequirePackage{scrhack}        % fix warnings when using KOMA with listings package
@@ -53,8 +43,7 @@
 % \RequirePackage{fixltx2e}                                    % fix some LaTeX issues
 % \RequirePackage{fix-cm}                   % fix font shape warnings related to xfrac
 % \RequirePackage{rotating}                            % provide sideways environments
-%------------------------------------------------------------------------------%
-%
+
 \addtokomafont{title}{\rmfamily}
 \addtokomafont{section}{\rmfamily}
 \addtokomafont{subsection}{\rmfamily}
@@ -65,17 +54,20 @@
 \addtokomafont{subsection}{\color{Blue}}
 \addtokomafont{subsubsection}{\color{Blue}}
 \addtokomafont{paragraph}{\color{Blue}}
-%
-%--- math, units and numbers --------------------------------------------------%
+
+% math, units and numbers
 \RequirePackage{amsmath}
 \RequirePackage{amssymb}
-% \RequirePackage{amstext}
+\RequirePackage{amstext}
 \RequirePackage{dsfont}
-\RequirePackage{siunitx}
-\PassOptionsToPackage{decimalsymbol=.}{siunitx}
 \RequirePackage{xfrac}
-%------------------------------------------------------------------------------%
-%
+\PassOptionsToPackage{decimalsymbol=.}{siunitx}
+\PassOptionsToPackage{binary-units=true}{siunitx}
+\PassOptionsToPackage{per-mode=fraction, fraction-function=\sfrac}{siunitx}
+\RequirePackage{siunitx}
+
+
+
 %--- figures ------------------------------------------------------------------%
 \RequirePackage{graphicx}
 %\RequirePackage{subcaption}
@@ -98,19 +90,19 @@
 % \makeindex       % for subject index, use style svind.ist with makeindex program
 %------------------------------------------------------------------------------%
 
-%--- caption ------------------------------------------------------------------%
+% caption
 \RequirePackage{caption}
 \RequirePackage{subcaption}
 \captionsetup{font=footnotesize, labelfont=bf}
 \captionsetup[subfigure]{font=footnotesize, labelfont=bf}
 \setcapindent{0pt}
-%------------------------------------------------------------------------------%
-%
+
+
 %--- footnotes ----------------------------------------------------------------%
 % \usepackage[bottom]{footmisc}                  % places footnotes at page bottom
 %------------------------------------------------------------------------------%
 
-%--- make it gay --------------------------------------------------------------%
+% make it gay
 \RequirePackage{xcolor}
 \definecolor{Orange}{cmyk}{0, 0.5, 1, 0}      % appropriate set for colour-blind
 \definecolor{SkyBlue}{cmyk}{0.8, 0, 0, 0}
@@ -121,9 +113,8 @@
 \definecolor{ReddishPurple}{cmyk}{0.1, 0.7, 0, 0}
 \definecolor{Black}{cmyk}{0, 0, 0, 1}
 \definecolor{Grey}{cmyk}{0, 0, 0, 0.5}
-%------------------------------------------------------------------------------%
 
-%--- source code --------------------------------------------------------------%
+% source code --------------------------------------------------------------%
 \RequirePackage{listings}
 \lstset{language=Fortran,%
 basicstyle=\scriptsize\ttfamily\bfseries\color{Vermillion},%
@@ -152,9 +143,3 @@ frame=single}
 \DeclareRobustCommand{\df}[1]{{\color{Vermillion}\textbf{DF}: \textit{#1}}\xspace}
 \DeclareRobustCommand{\q}[1]{{\color{Vermillion}\textbf{Question}: \textit{#1}}\xspace}
 \DeclareRobustCommand{\todo}[1]{{\color{Vermillion}\textbf{To do}: \textit{#1}}\xspace}
-%------------------------------------------------------------------------------%
-%
-%
-%
-%
-%
