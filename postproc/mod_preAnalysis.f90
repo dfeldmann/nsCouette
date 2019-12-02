@@ -91,7 +91,7 @@ CONTAINS
     INTEGER(KIND=4) :: i_time,m_r_ifile,m_th_ifile,m_z_ifile
     REAL(KIND=8)    :: time,dt
     CHARACTER(40)   :: fBase_ic 
-    NAMELIST /parameters_restart/ i_time,time,dt,m_r_ifile,m_th_ifile,m_z_ifile,fBase_ic
+    namelist /parameters_restart/ i_time, time, dt, m_r_ifile, m_th_ifile, m_z_ifile, alpha_ifile, fbase_ic
 
     allocate(f_hat_mp(m_r,mp_f))
     allocate(f_hat_mp_dt(m_r,mp_f))
@@ -129,27 +129,28 @@ CONTAINS
     CALL MPI_File_close(fh2,ierr)
 
 
-    !read metadata
+    ! read metadata from info file
     if (myid == root) then
-       open(unit=107,file=trim(fName_ic)//'.info')
-       read(107,nml=parameters_restart)
+       open(unit=107, file=trim(fName_ic)//'.info')
+       read(107, nml=parameters_restart)
        close(107)
        delta_t=time
 
        open(unit=107,file=trim(fName_dt)//'.info')
-       read(107,nml=parameters_restart)
+       read(107, nml=parameters_restart)
        close(107)
        delta_t=time-delta_t
-    endif
+    end if
     CALL MPI_Bcast(delta_t,1,MPI_REAL8,root,comm,ierr)
 
     print *,'# ',trim(fName_ic),' -- ',trim(fName_dt)
     print *,'# delta_t:',delta_t
 
-  END SUBROUTINE read_coeff
+END SUBROUTINE read_coeff
 
-  !----------------------------------------
-  SUBROUTINE norm_du(phi,fPhi)
+
+
+SUBROUTINE norm_du(phi,fPhi)
     !--------------------------------
     ! evaluate the f(phi)=sqrt{|int_{volume} {u(t)-exp(i*phi)*u(t+dt)}|}
     ! but in spectral space

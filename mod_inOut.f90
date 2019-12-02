@@ -58,12 +58,12 @@ implicit none
   namelist /parameters_timestep/ numsteps,init_dt,variable_dt,maxdt,courant
   namelist /parameters_output/ dn_coeff,dn_ke,dn_vel,dn_nu,dn_hdf5,print_time_screen,fbase_ic,dn_prbs,prl_r,prl_th,prl_z
   namelist /parameters_control/ restart,runtime
-  namelist /parameters_restart/ i_time, time,dt, m_r_ifile, m_th_ifile, m_z_ifile, fbase_ic
+  namelist /parameters_restart/ i_time, time,dt, m_r_ifile, m_th_ifile, m_z_ifile, alpha_ifile, fbase_ic
   namelist /parameters_initialcondition/ ic_tcbf, ic_temp, ic_pert, ic_p
 
   private :: spec,aux_hat_mp
-  private :: parameters_grid,parameters_physics,parameters_timestep,parameters_output,&
-       &     parameters_control,parameters_restart
+  private :: parameters_grid, parameters_physics, parameters_timestep, parameters_output, &
+       &     parameters_control, parameters_restart
 
   integer(kind=4), dimension(prl_n) :: prl_rnk  ! rank of each probe location
   integer(kind=4), dimension(prl_n) :: prl_io   ! i/o unit for each probe location
@@ -218,7 +218,9 @@ call mpi_bcast(dt,1,mpi_real8,root,comm,ierr)
 call mpi_bcast(m_r_ifile,1,mpi_integer,root,comm,ierr)
 call mpi_bcast(m_th_ifile,1,mpi_integer,root,comm,ierr)
 call mpi_bcast(m_z_ifile,1,mpi_integer,root,comm,ierr)
+call mpi_bcast(alpha_ifile,1,mpi_real8,root,comm,ierr)
 call mpi_bcast(fbase_ic,len(fbase_ic),mpi_character,root,comm,ierr)
+
 
 ! Construct file name to read initial conditions from
 write(suffix, '(i0.8)') i_time
@@ -517,8 +519,8 @@ end subroutine write_probes
     
     if (myid == root) then
        !(over)write minimal info required for restart from latest coeff checkpoint
-       open(unit=117,file='restart',delim='QUOTE')
-       write(117,nml=parameters_restart)
+       open(unit=117, file='restart', delim='QUOTE')
+       write(117, nml=parameters_restart)
        close(117)
     endif
 
@@ -567,12 +569,11 @@ end subroutine write_probes
     CALL Mpi_File_close(fh,ierr)
 
     call perfoff
-
     
-!write metadata
+    ! write metadata
     if (myid == root) then
 
-       print*,'written coeff file to disk: '//fName_ic
+       print*, 'written coeff file to disk: '//fName_ic
 
        eta_ifile=eta
        k_th0_ifile=k_th0
@@ -580,20 +581,20 @@ end subroutine write_probes
        m_r_ifile=m_r
        m_th_ifile=m_th
        m_z_ifile=m_z
+       alpha_ifile=alpha
        git_ifile=git_id
        arch_ifile=arch_id
        cmp_ifile=cmp_flgs
-
+       
        ! Write metadata for each coeff file for archival purposes
        open(unit=107, file=trim(fName_ic)//'.info')
        write(107, nml=parameters_restart)
        write(107, nml=parameters_info)
        close(107)
 
+    end if
 
-    endif
-
-  END SUBROUTINE output_coeff
+  end subroutine output_coeff
 
   !------------------------------------------------------------------
   SUBROUTINE output_energy()
@@ -802,7 +803,7 @@ if (myid .eq. root) then
 
  ! compute friction Reynolds number Re_tau = u_tau R / nu
  u_tau_i  = dsqrt(dabs(tau_i))
- u_tau_o  = dsqrt(dabs(tau_i))
+ u_tau_o  = dsqrt(dabs(tau_o))
  re_tau_i = u_tau_i / 2.0d0
  re_tau_o = u_tau_o / 2.0d0
 
@@ -864,7 +865,7 @@ end subroutine setup_wavenumber
        stop
     endif
     if (myid == root) print*,'restarting from '//fName_ic
-
+    
     if (scale .eqv. .true.) then
        
        CALL MPI_File_set_view(fh,disp,mpi_spec,filetype2,"native",&
@@ -909,6 +910,32 @@ end subroutine setup_wavenumber
 #endif /* TE_CODE */
        fk_mp%th    = f_hat_mp%k_th
        fk_mp%z     = f_hat_mp%k_z
+
+
+       !If radial grid changes with respect to the initial condition (interpolate)
+       if (alpha .ne. alpha_ifile) then
+
+          mp_f_ifile = mp_f
+          
+          ALLOCATE(aux_hat_mp(m_r_ifile,mp_f_ifile))
+          
+          aux_hat_mp%ur =  u_hat_mp%r 
+          aux_hat_mp%uth = u_hat_mp%th
+          aux_hat_mp%uz =  u_hat_mp%z
+#ifdef TE_CODE
+          aux_hat_mp%T = u_hat_mp%T  
+#endif /* TE_CODE */
+          
+          CALL readscal(aux_hat_mp%ur,u_hat_mp%r,fk_mp%th)
+          CALL readscal(aux_hat_mp%uth,u_hat_mp%th,fk_mp%th)
+          CALL readscal(aux_hat_mp%uz,u_hat_mp%z,fk_mp%th)
+#ifdef TE_CODE
+          CALL readscal(aux_hat_mp%T,u_hat_mp%T,fk_mp%th)
+#endif /* TE_CODE */
+
+          DEALLOCATE(aux_hat_mp)
+          
+       end if
 
     endif
 
@@ -1336,12 +1363,24 @@ end subroutine base_flow
       REAL(kind=8) :: par_real(1:m_r_ifile), par_imag(1:m_r_ifile)                                                         
       INTEGEr(kind=4) :: i                                                                                                                     
       
-      if (m_r .ne. m_r_ifile) then                                                                                                             
+      if ((m_r .ne. m_r_ifile) .or. (alpha .ne. alpha_ifile)) then                                                                                                            
          
          allocate(r_input(m_r_ifile))                                                                                              
          
-         !compute radial points  (Chebyshev distributed nodes)
-         r_input(1:m_r_ifile) = (/(((r_i+r_o)/2 - COS(PI*i/(m_r_ifile-1))/2), i=0,(m_r_ifile-1))/)
+         !Define radial grid for initial condition
+
+         if (alpha_ifile .eq. 0d0) then
+            r_input(1:m_r_ifile) = (/(((r_i+r_o)/2d0 - COS(PI*i/(m_r_ifile-1))/2), i=0,(m_r_ifile-1))/)   ! Chebyshev-distributed nodes
+         elseif ((alpha_ifile .gt. 0d0) .and. (alpha_ifile .le. 1d0)) then
+            r_input(1:m_r_ifile) = (/(((r_i+r_o)/2d0 + asin(-alpha_ifile*cos(PI*i/(m_r_ifile-1)))&
+                 /(2d0*asin(alpha_ifile))), i=0,(m_r_ifile-1))/)
+         else
+            !Read radial grid from file
+            open(unit=4,file='radial_distribution_old.in')
+            READ(4,*) r_input
+            close(4)
+         end if
+
          
          !Get interpolation weights                                                                                                            
          

@@ -113,9 +113,10 @@ private :: alloc_vec_mpi,dealloc_vec_mpi,alloc_vec_r2d,dealloc_vec_r2d
   integer(kind=4), parameter :: ic_np = 6       ! Number of initial perturbations
   real(kind=8), dimension(ic_np, 3) :: ic_p = 0 ! lth perturbation: amplitude and wavevector (l, (al, k_thl, k_zl))
 
-  !------------------------------------Variable pars of initial velocity file
-  REAL(KIND=8)    :: Re_i_ifile,Re_o_ifile
-  INTEGER(KIND=4) :: m_r_ifile,m_th_ifile,m_z_ifile
+  ! Variables of initial condition read from file
+  real(kind=8)    :: re_i_ifile, re_o_ifile           ! Reynolds numbers
+  real(kind=8)    :: alpha_ifile                      ! radial grid point distribution
+  integer(kind=4) :: m_r_ifile, m_th_ifile, m_z_ifile ! number of points and modes
 #ifdef TE_CODE
   REAL(KIND=8)    :: Gr_ifile,Pr_ifile
 #endif /* TE_CODE */
@@ -125,7 +126,7 @@ private :: alloc_vec_mpi,dealloc_vec_mpi,alloc_vec_r2d,dealloc_vec_r2d
   REAL(KIND=8)    :: temp_prof(m_r)
 #endif /* TEST2 */
 
-  INTEGER(kind=4) ::  m_f_ifile,mp_f_ifile,mp_fmax_ifile
+  INTEGER(kind=4) ::  m_f_ifile, mp_f_ifile, mp_fmax_ifile
   
   logical :: extended_mf_grid=.false.
  

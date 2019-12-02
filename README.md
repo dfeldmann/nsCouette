@@ -13,8 +13,8 @@ The source code can be easily downloaded from our git repository. Please read th
 
 ```
 # Download the repository
-git clone https://github.com/dfeldmann/nsCouette
-cd nsCouette
+git clone https://gitlab.mpcdf.mpg.de/mjr/nscouette
+cd nscouette
 ls doc
 ```
 

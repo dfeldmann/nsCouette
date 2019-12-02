@@ -26,8 +26,8 @@ module mod_params
   
   implicit none
   save
-
-  !------------------------------------MPI error check
+  !------------------------------------error check variables
+  INTEGER(KIND=4),private :: IOstatus,n_lines
   INTEGER(KIND=4) :: ierr
   
   !------------------------------------Mathematics constants
@@ -161,16 +161,44 @@ subroutine init_grid
 
   allocate(r(n_r),th(n_th),z(n_z))
 
+  !Setting the radial grid
+  
   if (alpha .eq. 0d0) then
      r(1:n_r) = (/(((r_i+r_o)/2d0 - COS(PI*ir/(n_r-1))/2), ir=0,(n_r-1))/)   ! Chebyshev-distributed nodes
      ierr = 0
   elseif ((alpha .gt. 0d0) .and. (alpha .le. 1d0)) then
-     r(1:n_r) = (/(((r_i+r_o)/2d0 - asin(-alpha*cos(PI*ir/(n_r-1)))/(2d0*asin(alpha))), ir=0,(n_r-1))/)
+     r(1:n_r) = (/(((r_i+r_o)/2d0 + asin(-alpha*cos(PI*ir/(n_r-1)))/(2d0*asin(alpha))), ir=0,(n_r-1))/)
      ierr = 0
-  else
+  elseif(alpha .gt. 1d0) then
      ierr = 1
+  else
+
+     !Check that number of radial nodes in file
+     !matches m_r
+
+     n_lines = 0
+     
+     OPEN (4, file = 'radial_distribution.in')
+     DO
+        READ(4,*,IOSTAT=IOstatus) 
+        IF (IOstatus .ne. 0) EXIT
+        n_lines = n_lines + 1
+     END DO
+     CLOSE (4)
+
+     print*,'nlines',n_lines
+     if (n_lines .eq. m_r) then
+        !Read radial grid from file
+        open(unit=4,file='radial_distribution.in')
+        READ(4,*) r
+        close(4)
+     else
+        ierr = 2
+     end if
   end if
      
+  !if (IOstatus .ne. 0) ierr = 2 
+  
   th(1:n_th) = (/(ir*len_th/n_th,ir=0,n_th-1)/)
   z(1:n_z) = (/(ir*len_z/n_z,ir=0,n_z-1)/)
 

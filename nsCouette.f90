@@ -19,7 +19,7 @@
 ! nsCouette. If not, see <http://www.gnu.org/licenses/>.                       !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-program nscouette
+program nsCouette
 ! nsCouette -- A high-performance for direct numercial simulations of turbulent
 ! Taylor-Couette flow written in modern Fortran.
 ! + Cylindrical coordinate system (r, theta, z)
@@ -47,8 +47,7 @@ program nscouette
 ! Please cite:
 ! [1] Jose Manuel Lopez, Daniel Feldmann, Markus Rampp, Alberto Vela-Martin,
 !     Liang Shi & Marc Avila. nsCouette -- A high-performance code for direct
-!     numerical simulations of turbulent Taylor-Couette flow. SoftwareX, xxx,
-!     p. xx-xx, 2019.
+!     numerical simulations of turbulent Taylor-Couette flow. arXiv:1908.00587 
 ! [2] Liang Shi, Markus Rampp, Bjoern Hof & Marc Avila. A hybrid MPI-OpenMP
 !     parallel implementation for pseudospectral simulations with application to
 !     Taylor-Couette flow. Computers & Fluids, 106, p. 1-11, 2015.
@@ -82,51 +81,42 @@ implicit none
 
 !$ nomp = omp_get_max_threads()
 
-
-  !----------------------------------------Initialization phase
-  tstep_time=0.d0
+  ! initialisation phase
+  tstep_time = 0.0d0
   call jobTimer%start()
+  call perfinit
+  call perfon ('main')
+  call pre_mpi()
 
-  Call perfinit
-  Call perfon ('main')
-
-
-  CALL pre_mpi()
-
-  if (myid == root) then
-     print '(A)','!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-     print '(A)','! NSCouette, a HPC code for DNS of Taylor-Couette flow                 !'
-     print '(A)','!                                                                      !'
-     print '(A)','! Copyright (C) 2016 Marc Avila, Bjoern Hof, Jose Manuel Lopez,        !'
-     print '(A)','!                    Markus Rampp, Liang Shi                           !'
-     print '(A)','!                                                                      !'
-     print '(A)','! NSCouette is free software: you can redistribute it and/or modify    !'
-     print '(A)','! it under the terms of the GNU General Public License as published by !'
-     print '(A)','! the Free Software Foundation, either version 3 of the License, or    !'
-     print '(A)','! (at your option) any later version.                                  !'
-     print '(A)','!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-     print '(A)'
-     print '(A,A,A,I5,A,I4,A)','starting NSCouette (',git_id, ') using',numprocs,&
-          &' MPI tasks, ',nomp,' OpenMP threads/task'  
-     print '(A)'
-  endif
-
-
-  allocate(tstp_all(numprocs))
-  call mapping_info(numprocs,myid)   !requires getcpu.c mod_getcpu.f90
-  
-  call read_pars()    ! read set of parameters from std in
-  call init_grid()    ! initialise numerical grid
-
-  !Check that the grid has been properly defined
-  if (ierr .eq. 1) then
-     if (myid==root) PRINT*, 'Wrong value of alpha!'
-     if (myid==root) PRINT*, 'alpha must be a value between 0 and 1'
-     if (myid==root) PRINT*, 'The simulation will stop'
-     CALL MPI_ABORT(comm,10,ierr)
+  if (myid .eq. root) then
+   write(*,'(a)') '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   write(*,'(a)') '! nsCouette - A high-performance code for DNS of turbulent Taylor-Couette flow !'
+   write(*,'(a)') '!                                                                              !'
+   write(*,'(a)') '! Copyright (C) 2019 Marc Avila, Bjoern Hof, Jose Manuel Lopez, Markus Rampp,  !'
+   write(*,'(a)') '!                    Liang Shi, Alberto Vela-Martin, Daniel Feldmann.          !'
+   write(*,'(a)') '!                                                                              !'
+   write(*,'(a)') '! nsCouette is free software: you can redistribute it and/or modify it under   !'
+   write(*,'(a)') '! the terms of the GNU General Public License as published by the Free         !'
+   write(*,'(a)') '! Software Foundation, either version 3 of the License, or (at your option)    !'
+   write(*,'(a)') '! any later version.                                                           !'
+   write(*,'(a)') '!                                                                              !'
+   write(*,'(a)') '! nsCouette is distributed in the hope that it will be useful, but WITHOUT ANY !'
+   write(*,'(a)') '! WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    !'
+   write(*,'(a)') '! FOR A PARTICULAR PURPOSE. See the GNU General Public License for more        !'
+   write(*,'(a)') '! details.                                                                     !'
+   write(*,'(a)') '!                                                                              !'
+   write(*,'(a)') '! You should have received a copy of the GNU General Public License along with !'
+   write(*,'(a)') '! nsCouette. If not, see <http://www.gnu.org/licenses/>.                       !'
+   write(*,'(a)') '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   write(*,'(3a, i6.5, a, i4.3, a)') 'Run nsCouette (Build ', git_id, ') with', numprocs, &
+        & ' MPI tasks and', nomp, ' OpenMP threads/task:'
   end if
 
-  call init_mpidist() ! intitalise mpi distribution of data 
+  allocate(tstp_all(numprocs))
+  call mapping_info(numprocs,myid) ! requires getcpu.c mod_getcpu.f90
+  call read_pars()                 ! read set of parameters from std in
+  call init_grid()                 ! initialise numerical grid
+  call init_mpidist()              ! intitalise mpi distribution of data 
 
   ! set initial conditions
   if (restart .eq. 0) then   ! generate flow field
@@ -223,16 +213,15 @@ implicit none
      call write_restart_file()
   endif
 
-  !----------------------------------------Closing phase
+  ! closing phase
   call final_probes() ! finalise time series output at several probe locations
   call close_files()
   call destroyer_fftw()
-
   call jobTimer%stop()
 
   CALL MPI_Gather(tstep_time,1,MPI_DOUBLE_PRECISION,tstp_all,1,MPI_DOUBLE_PRECISION,root,MPI_COMM_WORLD, ierr) 
   if (myid .eq. root) then
-   print '(a)', '------------------------------------------------------------------------------------'
+   print '(a)', '--------------------------------------------------------------------------------'
    print '(a, i9.8)', 'Total number of computed timesteps:', i_steps
    print '(a, f9.2, a)', 'Total elapsed WCT since start up:', jobtimer%elapsedtime(), 's'
    print '(a, 3(f9.4, a))', 'Average elapsed WCT per time step w/o coeff io (min, mean, max task):', &
@@ -243,12 +232,11 @@ implicit none
   CALL post_timeStep()
   CALL post_mpi()
 
-
   Call perfoff ()
 
   IF (myid == root) CALL perfout('main')
 
-
   CALL MPI_Finalize(ierr)
-  !-----------------------End-------------------------------
-END PROGRAM nsCouette
+
+end program nsCouette
+

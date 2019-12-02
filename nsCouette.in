@@ -26,7 +26,7 @@ m_z0  = 16                   ! axial Fourier modes     => 2*m_z0+1 grid points (
 k_th0 = 6.0                  ! azimuthal wavenumber    => L_th = 2*pi/k_th0 azimuthal length of grid
 k_z0  = 2.6179938779914944d0 ! axial wavenumber        => L_z =  2*pi/k_z0  axial length of grid
 eta   = 0.868d0              ! radius ratio => r_i = eta/(1-eta),r_o = 1/(1-eta) inner/outer radius
-alpha = 0.001d0              ! Value from 0 to 1 to set the distribution of radial nodes => 0 (Chebyshev) ----- 1 (uniform)
+alpha = 0.0d0                ! distribution of radial nodes, 0: Chebyshev, 1: uniform, <0: radial_distribution.in
 /
 
 &parameters_physics
