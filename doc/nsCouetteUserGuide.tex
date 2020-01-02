@@ -25,7 +25,7 @@
 \input{userDefs/myCommands}
 
 \title{A user guide for \nsc}
-\author{Daniel~Feldmann, Jose~M.~L\'opez,\\ Markus~Rampp, Liang~Shi \& Marc~Avila}
+\author{Daniel~Feldmann, Jose~Manuel~L\'opez,\\ Markus~Rampp, Liang~Shi \& Marc~Avila}
 \date{\today}
 
 \begin{document}
@@ -35,11 +35,17 @@
 This is a hands-on introduction to \nsc; A highly scalable software tool
 to integrate the full Navier--Stokes equations for incompressible fluid
 flows between deferentially heated and independently rotating concentric
-cylinders forward in time. \nsc is based on a pseudospectral spatial
+cylinders forward in time. It is based on a pseudospectral spatial
 discretisation and dynamic time-stepping. It is implemented in modern
-\fortran with a hybrid \mpi-\omp parallelisation scheme and thus designed
-to compute turbulent flows at high Reynolds and Rayleigh numbers. An
-additional GPU-accelerated implementation (\cuda) for intermediate problem
+\fortran with a hybrid \mpi-\omp parallelisation scheme and thus tailored
+to compute turbulent flows at high Reynolds and Rayleigh numbers. With a
+number of pre-configured \code{Makefiles} for different architectures,
+easy installation, simple handling of input parameters, portable
+\code{HDF5} output, visualisation tools, comprehensive documentation and
+internal quality assurance, \nsc is designed to lower the barrier to entry
+to numerical research in highly-turbulent fluid flows.
+\par
+An additional GPU-accelerated implementation (\cuda) for intermediate problem
 sizes as well as a basic version for turbulent pipe flow (\nsp) are also
 provided. This guide can be used to get familiar with the prerequisites,
 compilation, running and structure of our code before using it for your
@@ -51,7 +57,7 @@ own research project.
 \section{For the impatient}
 \label{sec:forTheImpatient}
 
-Basically, downloading, building, and running the code goes as easy as this: 
+Basically, downloading, building, and running the code goes as easy as this:
 \begin{lstlisting}[language=bash]
 git clone https://github.com/dfeldmann/nsCouette
 make ARCH=make.arch.gcc-linux HDF5IO=no
@@ -59,9 +65,9 @@ export OMP_NUM_THREADS=4
 mpiexec -np 2 ./nsCouette.x < nsCouette.in
 \end{lstlisting}
 However, for further details and explanations, examples and problem solving
-please take the time to read the user guide at hand. If this doesn't help,
-feel free to \href{mailto:nsCouette@zarm.uni-bremen.de}{contact us}. We are
-happy to help and we hope you enjoy using \nsc!
+please take the time to read this document and follow the provided tutorials.
+If this doesn't help, feel free to \href{mailto:nsCouette@zarm.uni-bremen.de}{contact us}.
+We are happy to help and we hope you enjoy using \nsc!
 
 \section{About Taylor-Couette}
 \label{sec:taylorCouette}
@@ -112,11 +118,11 @@ vector, with its components $u_{r}$, $u_{\theta}$ and $u_{z}$ pointing along the
 cylindrical coordinates in the radial ($r$), azimuthal ($\theta$) and axial ($z$)
 direction.
 \par
-\mod{For the version of \nsc with thermal convection an additional equations for the
+For the version of \nsc with thermal convection an additional equations for the
 temperature enters the stage, which couples to the momentum equation as described
 in section~\ref{sec:thermalConvection}. For \nsp, the code version to compute flow
 through a straight pipe geometry, the governing equations as described in detail
-in section~\ref{sec:nspGoverningEquations}.}
+in section~\ref{sec:nspGoverningEquations}.
 
 \subsection{Control parameters and non-dimensional description}
 \label{sec:controlParameters}
@@ -165,7 +171,7 @@ appear only through a Dirichlet boundary condition for the velocity vector
 \begin{align}
 \vec{u}(r=r_{i,o}, \theta, z, t) =
 \begin{bmatrix}
-0 & \Reynolds_{i,o} & 0 
+0 & \Reynolds_{i,o} & 0
 \end{bmatrix}^{\intercal}
 \label{eq:noslipBC}
 \end{align}
@@ -175,13 +181,13 @@ for the velocity is already implicitly defined through our choice for unit
 length ($d$) and unit time ($\sfrac{d^2}{\nu}$), and is thus given by
 $\sfrac{\nu}{d}$.
 \par
-\mod{For the version of \nsc with thermal convection additional parameters appear
+For the version of \nsc with thermal convection additional parameters appear
 in the equations to control the non-dimensional temperature gradient and the
 fluid properties, as described in sections~\ref{sec:boundaryConditions} and
 \ref{sec:thermalConvection}. For \nsp, the code version to compute flow
 through a straight pipe geometry, different boundary conditions, different
 driving mechanisms, and different control parameters appear in the
-equations as described in detail in section~\ref{sec:nspGoverningEquations}.}
+equations as described in detail in section~\ref{sec:nspGoverningEquations}.
 
 
 
@@ -212,23 +218,23 @@ Building \nsc requires a Linux operating system, standard compilers and only
 very few additional software libraries. All of them are commonly available as
 high-quality, open source software packages or as vendor-optimised tool chains.
 For the examples and tutorials (Section~\ref{sec:tutorials}) presented in this user
-guide, we assume that you use a \code{bash} shell, although not necessarily 
+guide, we assume that you use a \code{bash} shell, although not necessarily
 required.
 
 \subsubsection{Compiler}
 \label{sec:compiler}
 
-You need a modern \fortran compiler which is 
+You need a modern \fortran compiler which is
 \href{https://en.wikipedia.org/wiki/OpenMP}{\code{OpenMP3}} compliant.
-Additionally, a corresponding \c compiler is necessary. \nsc has so far been 
+Additionally, a corresponding \c compiler is necessary. \nsc has so far been
 tested with Intel's \code{ifort} and \code{icc} versions 12 through 15 as well as
-\code{PSXE2017} and \code{PSXE2018}, GNU's \code{GCC-4.7} to \code{GCC-4.9} and 
+\code{PSXE2017} and \code{PSXE2018}, GNU's \code{GCC-4.7} to \code{GCC-4.9} and
 PGI's compilers version 14.
 \par
 Optionally, you will need a suitable version of NVIDIA's \cuda toolkit in case
-you are interested in working with the subsidiary GPU-accelerated version of our 
-code. Note, that in this case a suitable choice for the \cuda version highly 
-depends on the hardware you are going to use. The GPU version of \nsc has so 
+you are interested in working with the subsidiary GPU-accelerated version of our
+code. Note, that in this case a suitable choice for the \cuda version highly
+depends on the hardware you are going to use. The GPU version of \nsc has so
 far been tested with the \cuda toolkit version from 8.0 to 10.1. Free software
 and further information can be found here:
 \begin{itemize}
@@ -259,7 +265,7 @@ here:
 You need a serial \code{BLAS}/\code{LAPACK} library. \nsc has so far been tested with
 Intel's \code{MKL-11.x}. The optional GPU version of \nsc relies on custom \cuda kernels
 to perform linear algebra.
-% -> adapt \verb+LIBLA+ and/or point environment variable \verb+$MKL_ROOT+ to a MKL installation 
+% -> adapt \verb+LIBLA+ and/or point environment variable \verb+$MKL_ROOT+ to a MKL installation
 For free software and furthe information see:
 \begin{itemize}
 \item \url{https://en.wikipedia.org/wiki/LAPACK}
@@ -277,9 +283,9 @@ and also with the \code{FFT} implementation which comes with
 Intel's math kernel libraries \code{MKL-11.1} to \code{MKL-11.3}.
 Earlier versions of \code{MKL} will likely fail. The optional GPU
 version of \nsc relies on the \code{cuFFT} library for computing
-Fourier transforms. 
-%   -> point environment variable \verb+$FFTW_ROOT+ to a FFTW3 installation 
-%   -> alternative: select  make FFTLIB=MKL (requires MKL 11.1 or later) 
+Fourier transforms.
+%   -> point environment variable \verb+$FFTW_ROOT+ to a FFTW3 installation
+%   -> alternative: select  make FFTLIB=MKL (requires MKL 11.1 or later)
 For free software and further information see:
 \begin{itemize}
 \item \url{http://www.fftw.org}
@@ -298,7 +304,7 @@ or \visit (Section~\ref{sec:visit}). \nsc has already been tested with
 \hdf output for now or encounter difficulties in providing a suitable \hdf
 installation, you can ignore this software requirement and simply switch this
 feature off (\code{HDF5IO=no}) when you compile the code
-(Section~\ref{sec:compileTimeOptions}). \par 
+(Section~\ref{sec:compileTimeOptions}). \par
 The GPU version of \nsc requires standard \hdf libraries and provides an output
 compatible with the \fortran code for visualisation.
 Free software and further information can
@@ -308,16 +314,16 @@ be found here:
 \item \url{https://portal.hdfgroup.org/display/support}
 \item \url{https://en.wikipedia.org/wiki/Hierarchical_Data_Format}
 \end{itemize}
-% -> point environment variable \verb+$HDF5_ROOT+ to an MPI-parallel HDF5 installation 
+% -> point environment variable \verb+$HDF5_ROOT+ to an MPI-parallel HDF5 installation
 
 \subsubsection{Software modules}
 \label{sec:softwareModules}
 
 If you are planing to run \nsc on a common supercomputer at one of the national
 high-performance computing centres (\eg in Germany
-\href{https://www.lrz.de/english/}{LRZ}, 
-\href{https://www.hlrs.de/home/}{HLRS}, 
-\href{http://www.fz-juelich.de/ias/jsc/EN/Home/home_node.html}{JSC}, 
+\href{https://www.lrz.de/english/}{LRZ},
+\href{https://www.hlrs.de/home/}{HLRS},
+\href{http://www.fz-juelich.de/ias/jsc/EN/Home/home_node.html}{JSC},
 \href{https://www.hlrn.de/home/}{HLRN}),
 all of the above mentioned software packages will most likely be readily available
 as user-loadable \href{http://modules.sourceforge.net/}{environment modules}.
@@ -333,7 +339,7 @@ feldmann@fsmcluster:~/$ module list                       # list currently loade
 feldmann@fsmcluster:~/$ module avail                      # overview of available packages
 feldmann@fsmcluster:~/$ module avail 2>&1 | grep -i intel # search for specific things
 feldmann@fsmcluster:~/$ module load moduleName            # load package, default version
-feldmann@fsmcluster:~/$ module switch moduleNameV2        # change to specific version 
+feldmann@fsmcluster:~/$ module switch moduleNameV2        # change to specific version
 feldmann@fsmcluster:~/$ module whatis moduleName
 feldmann@fsmcluster:~/$ module help moduleName
 feldmann@fsmcluster:~/$ module purge                      # unload all packages
@@ -345,17 +351,25 @@ feldmann@fsmcluster:~/$ mpiifort --version
 \subsubsection{Self-build libraries}
 \label{sec:selfBuildLibraries}
 
-If you are planing to run \nsc on your laptop, desktop, or local
-institute cluster, you will most likely have to install some or all of the above
-mentioned software packages yourself, before you can build and run \nsc. 
-Regarding \mpi and the compilers, it is worth trying to install them using your 
-favourite software package manager (\code{apt-get}, \code{rpm} and alike). For
-the rest, it might be necessary to download the source files and 
-build the libraries yourself. In appendix~\ref{app:selfBuildLibraries}, you will find detailed
-examples of how to correctly configure and build some of the required libraries (\code{FFTW3}, \code{zlib} and \hdf) for the use with \nsc on our local \code{fsmcluster} at the  
-\href{https://www.zarm.uni-bremen.de/en/}{ZARM} institute. 
-It should, however be clear, that these examples can only serve as a rough guideline to install all necessary software
-packages on your target Linux system.
+If you are planing to run \nsc on your laptop, desktop, or local institute
+cluster, you will most likely have to install some or all of the above
+mentioned software packages yourself, before you can build and run \nsc.
+Regarding \mpi and the required compilers, it is worth trying to install
+them using your favourite software package manager (e.g. \code{apt-get},
+\code{rpm} and alike).
+\begin{lstlisting}[language=bash]
+feldmann@darkstar:~/$ sudo apt-get install openmpi-bin libopenmpi-dev mpi-default-dev
+feldmann@darkstar:~/$ sudo apt-get install gfortran gcc
+feldmann@darkstar:~/$ gfortran --version
+\end{lstlisting}
+For the rest, it might become necessary to download the source files and
+build the libraries yourself. In appendix~\ref{app:selfBuildLibraries}, you
+will find detailed examples of how to correctly configure and build some
+of the required libraries (\code{FFTW3}, \code{zlib} and \hdf) for the use
+with \nsc on our local \code{fsmcluster} at the
+\href{https://www.zarm.uni-bremen.de/en/}{ZARM} institute. It should,
+however be clear, that these examples can only serve as a rough guideline
+to install all necessary software packages on your target Linux system.
 
 \subsection{Download the source files}
 \label{sec:download}
@@ -369,7 +383,7 @@ feldmann@darkstar:~/$ cd $HOME
 feldmann@darkstar:~/$ mkdir nsCouette
 feldmann@darkstar:~/$ cd nsCouette
 \end{lstlisting}
-This is the place where you should put the source files. This is also the place, 
+This is the place where you should put the source files. This is also the place,
 where we choose to put all the case directories -- one for each tutorial
 (Section~\ref{sec:tutorials}) -- so that we have everything together in one place. Note,
 however, that depending on the system you are working on, policy and quotas might
@@ -412,7 +426,7 @@ or the GPU-accelerated \cuda version. The
 to figure out on which branch you currently are and will get you
 the latest changes (\eg bug fixes or new features) from the remote
 repository. A few more helpful hints on how to use \code{git} can
-be found in appendix~\ref{app:git}.  
+be found in appendix~\ref{app:git}.
 
 \subsection{Compile the code}
 \label{sec:compile}
@@ -437,8 +451,8 @@ building -- and also running -- the code. Have a look at them and make a
 copy of one of the templates which appears closest to your platform/situation
 and modify it accordingly using your favourite text editor (\eg \code{vi}).
 \begin{lstlisting}[language=bash]
-feldmann@darkstar:~/nsCouette/nsCouette/scripts$ ls 
-nsCouetteAtDarkstar.sh  nsCouetteAtFsm.sh  nsCouetteAtKonrad.sh  nsPipeAtKonrad.sh 
+feldmann@darkstar:~/nsCouette/nsCouette/scripts$ ls
+nsCouetteAtDarkstar.sh  nsCouetteAtFsm.sh  nsCouetteAtKonrad.sh  nsPipeAtKonrad.sh
 submit_loadl.sh  submit_sge.sh  submit_slurm.sh
 feldmann@darkstar:~/nsCouette/nsCouette/scripts$ cp n*Darkstar.sh nsCouetteAtMyPlatform.sh
 feldmann@darkstar:~/nsCouette/nsCouette/scripts$ vi nsCouetteMyPlatform.sh
@@ -483,16 +497,16 @@ make.arch.gcc-mkl make.arch.pgi-mkl
 feldmann@darkstar:~/nsCouette/nsCouette/ARCH$ cp make.arch.darkstar make.arch.myPlatform
 feldmann@darkstar:~/nsCouette/nsCouette/ARCH$ vi make.arch.myPlatform
 \end{lstlisting}
-By modifying we mean, that you should configure the correct compiler and libraries 
+By modifying we mean, that you should configure the correct compiler and libraries
 according to your environment and also specify the desired compiler options (\eg
-hardware specific optimisation flags). In case you use self-made libraries (see 
+hardware specific optimisation flags). In case you use self-made libraries (see
 section~\ref{sec:selfBuildLibraries} and appendix~\ref{app:selfBuildLibraries}),
 make sure to correctly set all necessary path variables (\eg \code{LD\_LIBRARY\_PATH}).
-Please consult your local IT support in case of problems. 
+Please consult your local IT support in case of problems.
 \par
 If everything is configured correctly, the executable can be (re-)build in the usual way by
-simply typing \code{make} and specifying the desired architecture file. It is recommended 
-to always \code{clean} the build directory before each compilation. 
+simply typing \code{make} and specifying the desired architecture file. It is recommended
+to always \code{clean} the build directory before each compilation.
 \begin{lstlisting}[language=bash]
 feldmann@darkstar:~/nsCouette/nsCouette$ make ARCH=myPlatform clean
 feldmann@darkstar:~/nsCouette/nsCouette$ make ARCH=myPlatform
@@ -504,12 +518,12 @@ feldmann@darkstar:~/nsCouette/nsCouette$ ls darkstar/
 nsCouette.x
 ...
 \end{lstlisting}
-If the code compiles correctly, a new sub directory is generated. It contains all the 
-generated objects (\code{.o}) and modules (\code{.mod}) as well as the executable 
-\code{nsCouette.x} itself. The subdirectory is named after the architecture file you 
+If the code compiles correctly, a new sub directory is generated. It contains all the
+generated objects (\code{.o}) and modules (\code{.mod}) as well as the executable
+\code{nsCouette.x} itself. The subdirectory is named after the architecture file you
 specified (here \eg \code{ARCH=myPlatform}). Specifying another architecture file, will
-generate another subdirectory with another executable. This way you are able to easily 
-manage different builds side by side. 
+generate another subdirectory with another executable. This way you are able to easily
+manage different builds side by side.
 
 \subsubsection{Compile-time options}
 \label{sec:compileTimeOptions}
@@ -536,7 +550,7 @@ feldmann@darkstar:~/nsCouette/nsCouette$ make ARCH=myPlatform DEBUG=<no|yes>
 
 Once you have compiled the executable (Section~\ref{sec:compile}), you
 are almost ready to run a simulation. Create a case directory and make
-sure that you have at least the executable and a parameter input file 
+sure that you have at least the executable and a parameter input file
 (Section~\ref{sec:parameterInputFile}) in that case directory.
 \begin{lstlisting}[language=bash]
 feldmann@darkstar:~/nsCouette/nsCouette$
@@ -641,11 +655,12 @@ ic_p(4, :) = 0.0d-0, 0, 0 ! Add up to six user defined perturbations
 \subsubsection{Control the time stepper}
 \label{sec:controlTimeStepper}
 
-The temporal integration scheme has been upgraded to a predictor-corrector method,
-see also section~\ref{sec:timeStepper}. This enables a variable time step size
-($\Delta t$), which is dynamically controlled during run time. This is of particular
-advantage if the flow state is either suddenly modified (applying disturbances,
-changing rotation rates etc.) or naturally undergoes strongly transient dynamics.
+The temporal integration scheme has been upgraded to a predictor-corrector method, see
+section~\ref{sec:timeStepper} and Guseva et al.~\cite{Guseva2015}. This enables a
+variable timestep size ($\Delta t$), which is dynamically controlled during runtime.
+This feature is of particular advantage, if the flow state is either suddenly modified
+(applying disturbances, changing rotation rates etc.) or naturally undergoes strongly
+transient dynamics.
 \par
 Most aspects of the time stepper can be easily controlled on a user-level using the
 name list \code{parameters\_timestep} in the parameter input file (see
@@ -677,7 +692,7 @@ $\Delta t$ of what you observed during the transient phase.
 \subsubsection{Setting the radial grid}
 \label{sec:radialGrid}
 
-\mod{The radial distribution of grid points can be specified at runtime by modifying the
+The radial distribution of grid points can be specified at runtime by modifying the
 \code{alpha} parameter ($\alpha$) included in the \code{parameters\_grid} name list. The
 nodes are distributed as
 \begin{align*}
@@ -691,14 +706,14 @@ j=0,\dots, m_r-1
 Note that $\alpha$ must have a value between $0$ and $1$. For $\alpha = 1$, the nodes are
 uniformly distributed, whereas for $\alpha = 0$, a Chebyshev grid with strong quadratic
 clustering near the walls is obtained. Radial grids whose behaviour falls between Chebyshev
-and equispaced grids are obtained if intermediate values of $\alpha$ are chosen.} 
+and equispaced grids are obtained if intermediate values of $\alpha$ are chosen.
 \par
-\mod{Alternatively, the radial grid can be read from an external file. This option is
+Alternatively, the radial grid can be read from an external file. This option is
 enabled if $\alpha$ is set to a negative value. The file containing the radial grid point
 coordinated must be named \code{radial\_distribution.in} and the points must be arranged
-in ascending order, \ie from the inner to the outer cylinder.}  
+in ascending order, \ie from the inner to the outer cylinder.
 \par
-\mod{When the simulation is started from a checkpoint file (see section~\ref{sec:checkpoint}),
+When the simulation is started from a checkpoint file (see section~\ref{sec:checkpoint}),
 the code automatically detects if the radial grid has been modified and interpolates the
 solution to the new grid. This is performed by comparing the value of $\alpha$ in the input
 file (parameters of the current simulation) and the restart file (parameters of the simulation
@@ -707,7 +722,7 @@ specified by an external file, this must be named \code{radial\_distribution\_ol
 both the new and old grids are specified in files, these must be named \code{radial\_distribution.in}
 and \code{radial\_distribution\_old.in}, respectively, and the value of $\alpha$ in the input
 file must be different (\ie a different negative number) than that in the restart file. This
-enables the code to identify that the grids are different and interpolation is required.}
+enables the code to identify that the grids are different and interpolation is required.
 
 
 \subsubsection{Setting boundary conditions}
@@ -740,7 +755,7 @@ you have two options how to specify initial values for the flow field
 variables, which can be controlled using the keyword \code{restart} in the
 parameter name list \code{parameters\_control}.
 \begin{itemize}
-\item 
+\item
 You can choose to generate initial conditions in the code itself
 (\code{restart=0}). Starting from scratch requires no additional
 files and data other than the executable itself (\code{nsCouette.x})
@@ -863,14 +878,14 @@ in the subdirectory \code{scripts}. Note that these scripts can serve only
 as a rough guideline. They worked on a number of HPC systems but most
 probably require some adaptation to a specific batch environment.
 \par
-In this example, a number of \code{numsteps=10000} time steps would be attempted
+In this example, a number of \code{numsteps=10000} timesteps would be attempted
 to run, but the code would stop after a maximum \code{runtime=86400} seconds
 (\SI{24}{\hour}) of elapsed wall-clock time depending on what limit is reached
 first. We have implemented an intrinsic safety margin corresponding to the
-average number of seconds it takes to perform two time steps.
+average number of seconds it takes to perform two timesteps.
 \par
 If \omp is enabled -- this is the default behaviour when compiling the code --
-environmental variables must be used to control the number of threads you would 
+environmental variables must be used to control the number of threads you would
 like to use and other related stuff. For example, specify
 \begin{lstlisting}[language=bash]
 export OMP_NUM_THREADS=4
@@ -878,27 +893,27 @@ export OMP_PLACES=cores
 export OMP_SCHEDULE=static
 export OMP_STACKSIZE=256M
 \end{lstlisting}
-if you want to use four \omp threads. The second line maps the threads to 
+if you want to use four \omp threads. The second line maps the threads to
 (physical) cores. The fourth line sets the stack size; experiment with larger or
 smaller values if unexpected segmentation faults (\code{SEGFAULT}) occur or if the
 memory per core is scarce, respectively. These are just basic usage guidelines for
-\mpi and \omp. For an advanced use of \mpi and \omp (\eg using \code{bash} 
+\mpi and \omp. For an advanced use of \mpi and \omp (\eg using \code{bash}
 scripts) or in case of problems, please consult your local IT support.
 
 \subsection{Control the hybrid parallelisation scheme}
 \label{sec:controlHybridScheme}
-\color{red}
+
 The hybrid parallelisation scheme of \nsc relaxes the limit imposed by the one-dimensional (1d)
-slab decomposition on the maximum number of processor cores and maps naturally to the 
+slab decomposition on the maximum number of processor cores and maps naturally to the
 prevailing multi-node, multi-core HPC architectures (See
 section~\ref{sec:parallelisationScheme}). Specifically, the flexibility to chose an appropriate
-combination for the number of \mpi tasks per node (\tpn) and the number of \omp threads per 
-\mpi task (\tpt) over time has proven key for achieving good performance across a rather wide 
-range of node architectures. Figure~\ref{fig:runtime} illustrates the performance of \nsc 
+combination for the number of \mpi tasks per node (\tpn) and the number of \omp threads per
+\mpi task (\tpt) over time has proven key for achieving good performance across a rather wide
+range of node architectures. Figure~\ref{fig:runtime} illustrates the performance of \nsc
 on different architectures ranging from \num{20} to \num{64} physical cores per compute node.
 \begin{figure}[htb]
 \centering
-\includegraphics[width=1.00\columnwidth]{../paper/figures/1nscouetteBenchmark.pdf}
+\includegraphics[width=1.00\columnwidth]{figures/nscouetteBenchmark.pdf}
 \caption{Runtime per timestep and breakdown into the main algorithmic
 components (different colours) of a typical \nsc run ($N_r=\num{512}$ and
 $\num{513}\times\num{1025}$ Fourier modes) computed on \num{32} and \num{64}
@@ -921,16 +936,16 @@ the code (Section~\ref{sec:makefile}).}
 \end{figure}
 Note, that \tpn is typically something like four or eight and the product ($\tpn\times\tpt$) is
 supposed to be equal the total number of physical cores per node. The most critical performance
-issue when running the code in hybrid mode (\ie with \omp enabled), can be an improper pinning 
-of the \mpi tasks and \omp threads to the CPU cores. We suggest the basic settings above based 
+issue when running the code in hybrid mode (\ie with \omp enabled), can be an improper pinning
+of the \mpi tasks and \omp threads to the CPU cores. We suggest the basic settings above based
 on the \code{OMP\_PLACES} environment variable from the
 \omp standard. However, different compilers and node architectures (NUMA, \hyperthreading,
 \dots) might require specific settings. The actual mapping can be checked by examining the
 standard output of \nsc. Consider the following example. You are working on a machine with
 \num{16} dual-socket compute nodes. Each compute node has two CPUs with \num{12} physical
-cores each. So there are \num{24} physical cores per node and \num{384} physical cores in 
-total. Then it would be a good first try to run \nsc with \num{32} \mpi tasks -- \ie two tasks 
-per node and one task per CPU, respectively -- and twelve \omp threads per \mpi task and CPU, 
+cores each. So there are \num{24} physical cores per node and \num{384} physical cores in
+total. Then it would be a good first try to run \nsc with \num{32} \mpi tasks -- \ie two tasks
+per node and one task per CPU, respectively -- and twelve \omp threads per \mpi task and CPU,
 respectively. For this example, the standard output of \nsc should look something like this:
 \begin{lstlisting}[language=bash]
 feldmann@darkstar:~/nsCouette/tc0040$ export OMP_NUM_THREADS=12
@@ -944,35 +959,35 @@ TASKS: 32 THREADS:12 THIS: 4 Host:nid01228 Cores:  0  1  2  3  4  5  6  7  8  9 
 TASKS: 32 THREADS:12 THIS: 5 Host:nid01228 Cores: 12 13 14 15 16 17 18 19 20 21 22 23
 ...
 \end{lstlisting}
-It is important to note, that the individual lines can appear in random order and, that the 
-numbering scheme for the cores is due to some low-level settings in the operating system and 
-hence is highly machine specific. Tools like \code{cpuinfo} (comes with Intel \mpi) or 
-\href{http://code.google.com/p/likwid}{\code{likwid-topology}} can be used to check the 
+It is important to note, that the individual lines can appear in random order and, that the
+numbering scheme for the cores is due to some low-level settings in the operating system and
+hence is highly machine specific. Tools like \code{cpuinfo} (comes with Intel \mpi) or
+\href{http://code.google.com/p/likwid}{\code{likwid-topology}} can be used to check the
 numbering scheme of a specific computer.
 \par
-It is recommended to map at least one \mpi task to each NUMA domain (CPU socket) and specify 
+It is recommended to map at least one \mpi task to each NUMA domain (CPU socket) and specify
 \code{OMP\_NUM\_THREADS} to the number of physical cores per node divided by the number of \mpi
-tasks you want map to each compute node. \hyperthreading is not beneficial for 
-\nsc. On contemporary HPC clusters with two Intel or AMD CPUs per node, we typically use two 
+tasks you want map to each compute node. \hyperthreading is not beneficial for
+\nsc. On contemporary HPC clusters with two Intel or AMD CPUs per node, we typically use two
 \mpi tasks per compute node and set:
 \begin{lstlisting}[language=bash]
 export OMP_NUM_THREADS=8  # 1 node = 2 x ( 8-core CPU, Intel Xeon E5-2670, SandyBridge)
 export OMP_NUM_THREADS=16 # 1 node = 2 x (16-core CPU, Intel Xeon E5-2698v3, Haswell)
-export OMP_NUM_THREADS=20 # 1 node = 2 x (20-core CPU, Intel Xeon Gold-6148, Skylake) 
+export OMP_NUM_THREADS=20 # 1 node = 2 x (20-core CPU, Intel Xeon Gold-6148, Skylake)
 ...
 \end{lstlisting}
 Note, however, that in the part of the code, where the radial derivatives of the velocities are
 Fourier-transformed to compute the nonlinear terms, the \omp-parallelism is limited by
 \code{3*mp\_r}. In case of thermal convection (Section~\ref{sec:thermalConvection}), it is
-limited by \code{4*mp\_r}, because of the additional array for the temperature field. Recall, 
-that \code{mp\_r} is the number of radial grid points per \mpi task. For the interested reader, 
-this part of the code can be identified by the performance \code{fft} in the  
+limited by \code{4*mp\_r}, because of the additional array for the temperature field. Recall,
+that \code{mp\_r} is the number of radial grid points per \mpi task. For the interested reader,
+this part of the code can be identified by the performance \code{fft} in the
 \code{mod\_nonlinear.f90} source file. Thus, if the maximum number of \mpi tasks is chosen for a
-given number of radial points (and hence \code{mp\_r=1}), it is advisable to use four or eight 
-\mpi tasks per node on large multi-core CPUs, and decrease \code{OMP\_NUM\_THREADS}  
+given number of radial points (and hence \code{mp\_r=1}), it is advisable to use four or eight
+\mpi tasks per node on large multi-core CPUs, and decrease \code{OMP\_NUM\_THREADS}
 accordingly, in order not to waste resources. A forthcoming release aims at alleviating this
 efficiency bottleneck by supporting threaded FFTs.
-\color{black}
+
 
 \subsection{Output}
 \label{sec:output}
@@ -1009,18 +1024,18 @@ to visualise and interpret the respective time series.
 \subsubsection{Fourier space flow field coefficients}
 \label{sec:ioCoeff}
 
-\mod{As described in detail in section~\ref{sec:spatialDiscretisation}, \nsc is based
+As described in detail in section~\ref{sec:spatialDiscretisation}, \nsc is based
 on a spectral discretisation using a Fourier-Galerkin expansion in two of the
 three spatial directions. Therefore, the entire information about an instantaneous
 flow field snapshot is stored and treated in terms of spectral coefficients.
 Input and output of the spectral coefficients is documented here in this section,
 whereas optional output in primitive variables ($\vec{u}, p, T$) is discussed in
-section~\ref{sec:iohdf5}.}
+section~\ref{sec:iohdf5}.
 \par
 The spectral coefficients are dumped to individual files (\code{coeff\_}) for each time
-step at a user-specified output interval. For a negative interval (\code{dn\_coeff=-1}), 
+step at a user-specified output interval. For a negative interval (\code{dn\_coeff=-1}),
 continuous output is disabled. However, in any case, one coefficient file is written
-after the very last time step of a correctly terminated simulation run. The coefficient
+after the very last timestep of a correctly terminated simulation run. The coefficient
 files, also called checkpoint files, are always written in binary \code{MPI-IO} format.
 They are meant to be read by \nsc itself or by derived post-processing tools using the
 parallel I/O infrastructure of \nsc. A small human-readable text file (\code{coeff\_*.info})
@@ -1029,8 +1044,8 @@ containing all relevant metadata is written automatically with each coefficient 
 The binary coefficient files will be generated every now and then, according to the
 setting of the \code{dn\_coeff} parameter in the input file (\code{nsCouette.in}),
 see section~\ref{sec:parameterInputFile}. For example, if you specify to output a
-coefficient file every \num{2000} time steps and run the simulation in total for
-\num{11000} time steps starting from scratch at time step zero, in the end there
+coefficient file every \num{2000} timesteps and run the simulation in total for
+\num{11000} timesteps starting from scratch at timestep zero, in the end there
 will be six coefficient files in total.
 \begin{lstlisting}[language=bash]
 feldmann@darkstar:~/nsCouette/myCase01$ ls coeff*
@@ -1042,7 +1057,7 @@ coeff_myCase01.00010000     coeff_myCase01.00010000.info
 coeff_myCase01.00011000     coeff_myCase01.00011000.info
 \end{lstlisting}
 These files contain the Fourier coefficients representing the velocity field
-and optionally the temperature field at one particular time step; also called
+and optionally the temperature field at one particular timestep; also called
 snapshots. Based on these coefficient files, \nsc implements an easy-to-use
 checkpoint-restart mechanism for handling long-running simulations. How the
 \code{coeff} files are used as a checkpoint to continue a simulation and how
@@ -1067,22 +1082,22 @@ following section.
 
 The primitive variables -- namely the velocity ($u_r$, $u_{\theta}$, $u_{z}$),
 the pressure ($p$) and optionally the temperature ($T$) -- can be written in
-\hdf format to individual files for each time step at a user-specified output
+\hdf format to individual files for each timestep at a user-specified output
 interval. The additional \hdf output is optional and completely independent of
 the output of spectral coefficients (Section~\ref{sec:ioCoeff}). All relevant
 metadata for each flow field snapshot are written to small \xmf files in order
 to facilitate easy analysis with common visualisation tools like \paraview and
-\visit. 
+\visit.
 \par
 The \hdf functionality is switched on by default and can be disabled at compile
 time (\code{make HDF5IO=<yes|no>}), as detail in section~\ref{sec:compileTimeOptions}.
 In that case, only spectral snapshots in binary format (Section~\ref{sec:ioCoeff})
-will be written. However, if the \hdf functionality is enabled, \nsc will generate 
+will be written. However, if the \hdf functionality is enabled, \nsc will generate
 \code{fields*.h5} files every now and then, according to the setting of the
 \code{dn\_hdf5} parameter in the input file (\code{nsCouette.in}), see
 section~\ref{sec:parameterInputFile}. For example, if you specify to output snapshots
-every \num{2000} time steps and run the simulation in total for \num{11000} time steps
-starting from scratch at time step zero, in the end there will be five physical flow
+every \num{2000} timesteps and run the simulation in total for \num{11000} timesteps
+starting from scratch at timestep zero, in the end there will be five physical flow
 field files in total.
 \begin{lstlisting}[language=bash]
 feldmann@darkstar:~/nsCouette/myCase01$ ls fields*
@@ -1139,11 +1154,11 @@ copying the corresponding \code{coeff\_*.info} file.
 \par
 A third initialisation option (\code{restart=2}) is also available, which allows
 to start the simulation from a checkpoint file, but resetting the physical time
-and time step counter to zero and creating new/fresh output files for the time
+and timestep counter to zero and creating new/fresh output files for the time
 series data. This might be useful if you want to change, for example, resolution
 within one simulation case or if you want to create a new simulation case with
 different control parameters based on initial conditions you created in a former
-simulation case. 
+simulation case.
 \par
 In any case the grid size of the continued simulation can be freely modified by
 adapting the corresponding parameters in the \code{nsCouette.in} file, but the
@@ -1323,14 +1338,14 @@ data.
 \item Two GUI windows will appear: The \visit main window (control panel) and the Vis window (white blank).
 \item Press the \code{Add} button in the middle of the main window. From the
 pull-down menu select the type of you want to plot, \textit{\eg}, ``contour'' or ``pseudocolor'';
-  \item  \textbf{Important step:} Add two operators one after another on the plot by clicking on the ``Operators'' next to the ``Add'' button. 
- Select in the pulldown menu ``CoordinateSwap'' to change our file coordinates $(\theta,z,r)$ to $(r,\theta,z)$ 
+  \item  \textbf{Important step:} Add two operators one after another on the plot by clicking on the ``Operators'' next to the ``Add'' button.
+ Select in the pulldown menu ``CoordinateSwap'' to change our file coordinates $(\theta,z,r)$ to $(r,\theta,z)$
  and ``Transform'' to change our coordinate system from
- cylindrical to cartesian (cf. Fig.~\ref{fig:VisIt}); 
+ cylindrical to cartesian (cf. Fig.~\ref{fig:VisIt});
   \item  Click on ``OpAtts'' on the top toolbars in the Main window and change the operator attributes according to the above specifications.
   \item  Click on ``Draw'' and you have the plot in the right Vis window (for large file, it takes time!);
   \item  Play with the plot and carefully observe the change after each operation;
-\end{itemize} 
+\end{itemize}
 
 
 
@@ -1369,7 +1384,7 @@ mod_vars.f90      # Definition of all (derived) variables
 mod_myMpi.f90     # MPI-related subroutines: windows, derived data types, etc.
 mod_fftw.f90      # Subroutines related to fast Fourier transforms
 mod_fdInit.f90    # Finite differences matrices for 1st and 2nd radial derivatives
-mod_nonlinear.f90 # Subroutine to compute the nonlinear advection term (pseudo-spectral) 
+mod_nonlinear.f90 # Subroutine to compute the nonlinear advection term (pseudo-spectral)
 mod_timeStep.f90  # The predictor-corrector time-stepper
 mod_inOut.f90     # Messy collection of input, output, base flow, initial conditions etc.
 mod_hdf5io.f90    # HDF5 output of primitive flow field variables
@@ -1384,7 +1399,7 @@ mod_getcpu.f90    # Mapping of the CPU. This module cannot be included.
 
 Basically speaking, the programme flow of \nsc is as follows.
 \begin{enumerate}
-\item Initialisation phase: \mpi, read parameter file (section~\ref{sec:parameterInputFile}), set initial conditions (section~\ref{sec:initialConditions}) 
+\item Initialisation phase: \mpi, read parameter file (section~\ref{sec:parameterInputFile}), set initial conditions (section~\ref{sec:initialConditions})
 \item Time-stepping: linear sub-step computation and nonlinear pseudo-computation)
 \item Finalising phase: \mpi, checkpoint output (section~\ref{sec:})
 \end{enumerate}
@@ -1414,7 +1429,6 @@ the parallelisation strategy.
 \subsection{Spatial discretisation}
 \label{sec:spatialDiscretisation}
 
-\mod{
 Due to the cylindrical nature of the problem, the governing equations (see
 section~\ref{sec:governingEquations}) are handled in a polar co-ordinate
 system ($r$, $\theta$, z), as sketched in figure~\ref{fig:tc}. The spatial
@@ -1428,7 +1442,7 @@ temperature ($T$) is given by
 \begin{align}
 \vec{u}(r,\theta,z) & =
 \sum_{l=-L}^{L}\sum_{n=-N}^{N}\hat{\vec{u}}(r,n,l)\cdot e^{i\left(n k_{\theta}\theta+l k_{z} z\right)}
-\text{,}\\ 
+\text{,}\\
 p(r,\theta,z) &
 =\sum_{l=-L}^{L}\sum_{n=-N}^{N}\hat{p}(r,n,l)\cdot e^{i\left(n k_{\theta}\theta+l k_{z} z\right)}
 \text{,}\\
@@ -1447,40 +1461,38 @@ the azimuthal arc degree. The natural periodic boundary condition in $\theta$ --
 \ie a full cylindrical domain -- is obtained by setting $k_{\theta}=1$. Setting
 $k_\theta=4$, for instance, corresponds to one quarter of the annulus, c.f.
 figure~\ref{fig:tc0040laminarTaylorCouette}. This imposes a fourfold azimuthal
-symmetry and generates a solution in a symmetry subspace.}
+symmetry and generates a solution in a symmetry subspace.
 \par
-\mod{
 The hat symbol (\eg $\hat{\vec{u}}$) in eq.~\eqref{eq:fourierGalerkinAnsatz} denotes
 quantities in Fourier space (data type see section~\ref{sec:constantVariablesAndDataTypes})
 and the tuple $(N, L)$ therefore determines the spectral numerical resolution in $\theta$
 and $z$. The fundamental wavenumbers ($k_{\theta}\equiv\code{k\_th0}$) and
 ($k_{z}\equiv\code{k\_z0}$), as well as the number of Fourier modes ($N\equiv\code{m\_{th}}$)
 and ($L\equiv\code{m\_{z0}}$), can be specified by the user in the \code{nsCouette.in}
-input file, as described in section~\ref{sec:parameterInputFile}.}
+input file, as described in section~\ref{sec:parameterInputFile}.
 \par
-\mod{
 The coefficients $\vec{\hat{u}}(r,l,n)$, $\vec{\hat{p}}(r,l,n)$ and
 $\vec{\hat{T}}(r,l,n)$ are complex numbers known as spectral coefficients.
 They contain the entire instantaneous flow field information and are
-written to the binary \code{coeff\_} files, as described in 
-section~\ref{sec:ioCoeff}.}
+written to the binary \code{coeff\_} files, as described in
+section~\ref{sec:ioCoeff}.
 \par
-\mod{Because the physical flow field ($\vec{u}, p, T$) is real valued,
+Because the physical flow field ($\vec{u}, p, T$) is real valued,
 the $\theta$-coefficients -- coming from a real-to-complex Fourier
 transform -- are complex valued but complex conjugate symmetric with
 respect to the zero mode. The $z$-coefficients -- coming from a
 complex-to-complex Fourier transform -- do in general not exhibit any
-symmetry.  
+symmetry.
 in the beginning
 of the azimuthal symmetry of the TC setup,
-spectral coefficients corresponding to negative and positive azimuthal modes are 
-complex conjugated. Therefore, only half of the $\theta$ modes need to be stored 
+spectral coefficients corresponding to negative and positive azimuthal modes are
+complex conjugated. Therefore, only half of the $\theta$ modes need to be stored
 and solved for, whereas all $z$ modes need to be considered. To reduce the size
-of the arrays and the number of computations, the equations are solved only for 
-the positive azimuthal modes and the symmetry property is enforced through the 
-FFT in the computations of the nonlinear terms. The total number of spectral 
+of the arrays and the number of computations, the equations are solved only for
+the positive azimuthal modes and the symmetry property is enforced through the
+FFT in the computations of the nonlinear terms. The total number of spectral
 coefficients used in a simulation with \nsc is hence given by
-$m_f = \left(m_{th}+1\right) \times 2m_{z0}$.}
+$m_f = \left(m_{th}+1\right) \times 2m_{z0}$.
 
 %TODO: add information on total number of DOF
 % the effective number of DOF $N_r \times m\_f$
@@ -1491,7 +1503,7 @@ $m_f = \left(m_{th}+1\right) \times 2m_{z0}$.}
 \subsection{Accuracy of the radial derivatives}
 \label{sec:accuracyFD}
 
-\mod{In \nsc the radial derivatives are approximated by high order finite differences. 
+In \nsc the radial derivatives are approximated by high order finite differences.
 The accuracy of this approximation is determined by the stencil length, \ie the number
 of consecutive nodes that are used in the approximation. The stencil length in \nsc
 corresponds to the parameter \code{n\_s}, which can be found in the module
@@ -1501,20 +1513,19 @@ restriction is that $\code{n\_s}\geq\num{5}$.
 %, \ie the radial derivatives must be at least fourth order accurate.
 The default implementation of \nsc is $\code{n\_s} = 9$.
 % uses eighth order finite differences (\code{n\_s} $= 9$).
-}
 \par
-\mod{Note that to keep the matrices banded the stencil length decreases towards 
-the boundaries (\eg one sided finite difference approximations are used at the 
-cylinders). However, for radial grid distributions with $\alpha \leq \num{0.5}$, 
-the global order is not affected by this reduction due to the clustering of nodes 
-near the cylinders (see figure 3 in~\cite{Shi2015}).} 
+Note that to keep the matrices banded the stencil length decreases towards
+the boundaries (\eg one sided finite difference approximations are used at the
+cylinders). However, for radial grid distributions with $\alpha \leq \num{0.5}$,
+the global order is not affected by this reduction due to the clustering of nodes
+near the cylinders (see figure 3 in~\cite{Shi2015}).
 \par
-\mod{As a final remark, we would like to stress that increasing the order of the
+As a final remark, we would like to stress that increasing the order of the
 finite difference scheme does not impact on the code's performance. This is
 because the computational cost of evaluating the radial derivatives (basically
 matrix-vector multiplications) is practically negligible as compared with the
 cost of the fast Fourier transforms performed during the computation of the
-nonlinear terms.}
+nonlinear terms.
 
 \subsection{Temporal discretisation}
 \label{sec:timeStepper}
@@ -1523,7 +1534,7 @@ Since the publication of our CAF paper~\cite{Shi2015}, quite some changes have b
 implemented to \nsc to further improve its usability and performance. Notable among
 these is the implementation of a new time-stepper. The governing equations are now
 integrated forward in time using a predictor-corrector algorithm, which allows to
-significantly increase the computational time step size $\Delta t$ in the simulation.
+significantly increase the computational timestep size $\Delta t$ in the simulation.
 The ideas for this time-stepper were borrowed from the \opf project; an open source
 code for pipe flow simulations developed by Ashley Willis~\cite{Willis2017}. A
 comprehensive description can be found on Ashley's web page, while the basic steps
@@ -1560,7 +1571,7 @@ scheme. It is set to \code{d\_implicit = 0.5} by default and can easily be
 changed at compile time by modifying the file \code{mod\_params.f90}. Note,
 that the temporal scheme is of second-order accuracy if $c=0.5$.
 
-\item The boundary conditions are imposed through influence matrices which are 
+\item The boundary conditions are imposed through influence matrices which are
 computed at a pre-processing stage.
 
 \item The user can choose between fix or variable time-step size. In the latter
@@ -1614,10 +1625,10 @@ the boundary conditions for the temperature in the file \code{mod\_timeStep.f90}
 and modifying the temperature and axial velocity of the base flow accordingly
 in the \code{subroutine base\_flow} contained in the file \code{mod\_InOut.f90}.
 \begin{lstlisting}[language=Fortran]
-! Boundary conditions for mode 0 (prescribed temperature at the cylinders)  
-if (abs(fk_mp%th(1,k)) <= epsilon .and. abs(fk_mp%z(1,k)) <= epsilon) then  
- rhs_p(1)   = dcmplx( 0.5d0, 0d0) 
- rhs_p(m_r) = dcmplx(-0.5d0, 0d0) 
+! Boundary conditions for mode 0 (prescribed temperature at the cylinders)
+if (abs(fk_mp%th(1,k)) <= epsilon .and. abs(fk_mp%z(1,k)) <= epsilon) then
+ rhs_p(1)   = dcmplx( 0.5d0, 0d0)
+ rhs_p(m_r) = dcmplx(-0.5d0, 0d0)
 end if
 \end{lstlisting}
 
@@ -1625,7 +1636,7 @@ end if
 \subsection{Parallelisation scheme}
 \label{sec:parallelisationScheme}
 
-\mod{Data distribution across \mpi tasks is accomplished using a one-dimensional (1d)
+Data distribution across \mpi tasks is accomplished using a one-dimensional (1d)
 slab decomposition of the computational domain. This technique follows naturally and
 straightforwardly from the Fourier--Galerkin ansatz we use for spatial discretisation,
 see section~\ref{sec:spatialDiscretisation}: when the variables are expanded in Fourier
@@ -1636,9 +1647,9 @@ discretised variable in \nsc is stored as a two-dimensional (2d) array, $(m\_r,m
 with the second dimension identifying the spectral coefficients and the first dimension
 its radial dependence. When the 1d slab decomposition is applied, the data is partitioned
 along the second dimension of the array, $mp\_f = m\_f/np$, so that each \mpi task
-contains a data chunk of size $(m\_r,mp\_f)$.}
+contains a data chunk of size $(m\_r,mp\_f)$.
 \par
-\mod{Since the computation of the nonlinear terms is carried out using a pseudospectral
+Since the computation of the nonlinear terms is carried out using a pseudospectral
 technique, spectral data must be transformed into data in physical space. These
 transformations are performed using fast Fourier transforms (FFT), which require each
 \mpi task to contain all spectral coefficients. To satisfy this requirement, while
@@ -1646,36 +1657,36 @@ keeping a 1d slab domain decomposition, the data, during the calculation of the 
 terms, is divided along the radial direction and organised in 2d arrays of size
 $(m\_f, mp\_r = m\_r/np)$. Such modification of the storage arrangement is efficiently
 performed by using global data transpositions based on \code{MPI\_Alltoall} and task-local
-transposes.}
+transposes.
 \par
-\mod{Note that both the number of radial modes $(m\_r)$ and Fourier modes $(m\_f)$ must
+Note that both the number of radial modes $(m\_r)$ and Fourier modes $(m\_f)$ must
 be divisible by the number of \mpi tasks $(np)$, which imposes a restriction in the
 selection of the numerical resolution. \nsc implements a simple technique that relaxes
-partially such restriction by allowing a free selection of the number of Fourier modes. 
+partially such restriction by allowing a free selection of the number of Fourier modes.
 If $m\_f$ is not divisible by $np$, $m\_f$ is automatically increased to satisfy the
 divisibility condition and the additional spectral coefficients are set to zero. Hence,
 the only restriction for the selection of modes in \nsc is that $m\_r$ must be divisible
-by $np$.}
+by $np$.
 \par
-\mod{Since in turbulent simulations the number of radial modes is typically much smaller
+Since in turbulent simulations the number of radial modes is typically much smaller
 than the total number of Fourier modes ($m\_r << m\_f$), the number of \mpi tasks that
 can be used in our 1d slab decomposition is limited by the value of $m\_r$. Consequently,
 if only this paralellisation strategy were applied, the achievable parallel speedup with
 respect to a serial code version would be at most $m\_r$. In order to increase the parallel
-scalability beyond this limit, an additional \omp parallelisation layer has been introduced. 
+scalability beyond this limit, an additional \omp parallelisation layer has been introduced.
 In the parts of the code where the solution of the linear equations is computed, \omp
 threads allow to parallelise over the $mp\_f$ spectral coefficients contained within each
-\mpi task. That is, if \code{n\_threads} is the number of \omp threads within each \mpi 
+\mpi task. That is, if \code{n\_threads} is the number of \omp threads within each \mpi
 task, each thread will solve $mp\_f/n\_threads$ linear equations to obtain the spectral
 coefficients. In the part where the non-linear terms are computed, some coarse-grain
 parallelism (\eg the scalar state variables and the components of the velocity vector can
 be Fourier-transformed independently of each other and some of these computations can be
-overlapped with the global transpositions) can be exploited with the \omp threads.}
+overlapped with the global transpositions) can be exploited with the \omp threads.
 \par
-\mod{A sketch illustrating the data distribution for this hybrid strategy is shown in
-figure~\ref{fig:domdec}. The variables here are discretised using $m\_r=8$ radial 
-modes and $m\_f=64$ spectral coefficients, and the simulation is run on a machine 
-with 64 cores.}
+A sketch illustrating the data distribution for this hybrid strategy is shown in
+figure~\ref{fig:domdec}. The variables here are discretised using $m\_r=8$ radial
+modes and $m\_f=64$ spectral coefficients, and the simulation is run on a machine
+with 64 cores.
 \begin{figure}[htb]
 \includegraphics[width=1.00\linewidth]{figures/hybrid_par.pdf}
 \caption{Sketch of the one-dimensional domain decomposition of the
@@ -1684,9 +1695,9 @@ two-dimensional numerical grid of eight radial (r) points times 64 Fourier
 Fourier modes in the $z$ and $\theta$ directions.}
 \label{fig:domdec}
 \end{figure}
-\mod{Data chunks resulting from the \mpi slab decomposition are indicated by the
-letter  P followed by a number. Note that the number of \mpi tasks has been set to 
-eight (P0\dots P7), which is the maximum possible value in this example ($np=m\_r$). 
+Data chunks resulting from the \mpi slab decomposition are indicated by the
+letter  P followed by a number. Note that the number of \mpi tasks has been set to
+eight (P0\dots P7), which is the maximum possible value in this example ($np=m\_r$).
 There are also four \omp threads per \mpi task which are indicated by the letter T
 followed by a number (T0\dots T3). The subgroups of data that are handled by each
 thread are shown in different colours. With the choice of $np=8$, $mp\_f=64/8=8$
@@ -1698,22 +1709,21 @@ theoretical parallel speedup of \num{32} is gained for the linear terms. In the
 transposed layout, by contrast, since a single radial point is computed by each
 \mpi task, the theoretical speedup would be limited by eight. Nevertheless, as
 indicated above, additional concurrency for the four \omp threads per \mpi task is
-exposed by:}
-\mod{
+exposed by:
 \begin{enumerate}
 \item
 Computing the Fourier transforms and derivative computations for each scalar
 variable and the individual components of vectors, respectively, independently
-in parallel. 
+in parallel.
 \item
 Handling the global \mpi transposition for some of the variables while others
 are still being computed.
-\end{enumerate}}
-\mod{Finally, we would like to note that an alternative strategy to the use of \omp is
+\end{enumerate}
+Finally, we would like to note that an alternative strategy to the use of \omp is
 to perform a 2d \mpi domain decomposition. This strategy has been used in a number
 of similar codes for the simulation of fluid flows (\eg Ashley Willis' \opf
 \cite{Willis2017}, John Gibson's \cf, Simpson, et cetera). We conducted a comparative
-study of the performance and scalability of two pipe flow codes with similar algorithmic 
+study of the performance and scalability of two pipe flow codes with similar algorithmic
 formulation but one implementing a 2d \mpi domain decomposition~\cite{Willis2017} and
 the other a hybrid \mpi-\omp strategy (\nsp). We observed that both strategies may be
 beneficial depending on the type of problem under consideration. For example, for big
@@ -1725,7 +1735,7 @@ more efficient than our hybrid strategy. Overall, when confronted with a 2d \mpi
 domain decomposition, we believe that our hybrid parallelisation scheme is a good
 compromise between simplicity of the implementation and achievable parallel scalability,
 which fits perfectly with the technological trend of multi-core processors with ever
-increasing core counts and stagnating per-core performances.}
+increasing core counts and stagnating per-core performances.
 
 
 
@@ -1758,11 +1768,11 @@ the \code{*.eps} output from \gnuplot to proper \code{*.pdf} figures.
 
 \subsection{Laminar Taylor-Couette flow in the stable regime}
 \label{sec:tc0040}
-To start off, we will first run a simulation of Taylor-Couette flow in the 
-stable regime, \ie at a very low Reynolds number. This allows us to perform our 
-first DNS on a regular laptop in less than a minute. Moreover, we can readily 
-compare the results to what we expect from theory. Go to your working directory, 
-copy the first Taylor-Couette tutorial case from the repository and inspect the 
+To start off, we will first run a simulation of Taylor-Couette flow in the
+stable regime, \ie at a very low Reynolds number. This allows us to perform our
+first DNS on a regular laptop in less than a minute. Moreover, we can readily
+compare the results to what we expect from theory. Go to your working directory,
+copy the first Taylor-Couette tutorial case from the repository and inspect the
 parameter input file (\code{nsCouette.in}) using your favourite  text editor
 (\eg \code{vi}, \code{emacs}, \code{kate}, \code{gedit} and such).
 \begin{lstlisting}[language=bash]
@@ -1797,24 +1807,24 @@ m_th =  4            ! N azimuthal Fourier modes
 m_z0 =  4            ! L axial Fourier modes
 /
 \end{lstlisting}
-This choice corresponds to a total of $n_r \times n_\theta \times n_z=M \times 
-(2N+1) \times (2L+1) = \num{16} \times \num{9} \times \num{9}$ significant 
-physical grid points, while the nonlinear terms are actually evaluated on $M 
-\times (3N+1) \times (3L+1) = \num{16} \times \num{13} \times \num{13}$ physical 
-grid points for dealiasing purposes. For further details, definitions and 
+This choice corresponds to a total of $n_r \times n_\theta \times n_z=M \times
+(2N+1) \times (2L+1) = \num{16} \times \num{9} \times \num{9}$ significant
+physical grid points, while the nonlinear terms are actually evaluated on $M
+\times (3N+1) \times (3L+1) = \num{16} \times \num{13} \times \num{13}$ physical
+grid points for dealiasing purposes. For further details, definitions and
 notations regarding the spatial discretisation scheme of \nsc, you might want to
 have a look at our CAF paper \cite{Shi2015} around page \num{3}. \par We want
-the simulation to run for \num{8000} time steps. And the size of the computational
-time step $\Delta t$ should be dynamically adapted to automatically guarantee
+the simulation to run for \num{8000} timesteps. And the size of the computational
+timestep $\Delta t$ should be dynamically adapted to automatically guarantee
 numerical stability during time integration. Both can be controlled using the
 relevant keywords in the namelist \code{parameters\_timestep}.
 \begin{lstlisting}[language=Fortran]
 &parameters_timestep
-numsteps    = 8000       ! Number of computational time steps
-variable_dt = T          ! Use variable (T) or fixed (F) time step size
+numsteps    = 8000       ! Number of computational timesteps
+variable_dt = T          ! Use variable (T) or fixed (F) timestep size
 /
 \end{lstlisting}
-Integrating the Navier-Stokes equations forward in time is a typical initial value 
+Integrating the Navier-Stokes equations forward in time is a typical initial value
 problem. Therefore, one remaining issue to discuss -- before we finally run our first
 DNS -- is choosing proper initial conditions (Section~\ref{sec:initialConditions})
 to start from. Since we do not have any suitable flow field data at hand, we choose
@@ -1836,8 +1846,8 @@ ic_p(1, :) = 4.0d-2, 0, 1 ! 1st perturbation: amplitude and wavevector (a1, k_th
 ic_p(2, :) = 6.0d-3, 1, 0 ! 2nd perturbation: amplitude and wavevector (a2, k_th2, k_z2)
 /
 \end{lstlisting}
-Additionally, the initial zero-velocity flow field is superimposed by a finite 
-amplitude perturbation to test whether the code actually captures the well-known 
+Additionally, the initial zero-velocity flow field is superimposed by a finite
+amplitude perturbation to test whether the code actually captures the well-known
 stable behaviour of the Taylor-Couette system for such a small Reynolds number.
 When thinking of a real world laboratory set-up, perturbations could model residual
 motions from filling the tank, mechanical vibrations from the drive, small density
@@ -1869,16 +1879,16 @@ TASKS: 1 THREADS: 8 THIS: 0 Host:darkstar Cores: 0 0 0 0 0 0 0 0
   step=  7900  dt=   1.8704145521610010E-004
  written hdf5/xdmf files to disk: fields_tc0040_00008000.{h5,xmf}
   step=  8000  dt=   1.8704145521610010E-004
- written coeff file to disk: coeff_tc0040.00008000       
- written coeff file to disk: coeff_tc0040.00008000       
+ written coeff file to disk: coeff_tc0040.00008000
+ written coeff file to disk: coeff_tc0040.00008000
 ------------------------------------------------------------------------------------
 Total number of computed timesteps: 00008000
 Total elapsed WCT since start up:  4.15s
-Average elapsed WCT per time step w/o coeff io (min, mean, max): 0.0005s, 0.0005s, 0.0005s
+Average elapsed WCT per timestep w/o coeff io (min, mean, max): 0.0005s, 0.0005s, 0.0005s
 feldmann@darkstar:~/nsCouette/tc0040$
 \end{lstlisting}
-The log tells us, that at some particular time steps, \nsc wrote instantaneous
-state files (\code{coeff*} and \code{fields*}) to disk, as described in 
+The log tells us, that at some particular timesteps, \nsc wrote instantaneous
+state files (\code{coeff*} and \code{fields*}) to disk, as described in
 section~\ref{sec:output}. Listing the content of our case directory by typing
 \begin{lstlisting}[language=bash]
 feldmann@darkstar:~/nsCouette/tc0040$ ls
@@ -1909,7 +1919,7 @@ feldmann@darkstar:~/nsCouette/tc0040$ tail -n 5 torque
 1.4698251738999E+000     1.0000007921586E+000     9.9999901683719E-001   ...
 1.4716955884521E+000     1.0000007776289E+000     9.9999903482444E-001   ...
 \end{lstlisting}
-the first/last five lines of this simple time series text file are dumped to the 
+the first/last five lines of this simple time series text file are dumped to the
 terminal. The first column represents the advancing physical time ranging from
 the initial state ($t=0$) we have specified, up to the very end ($t\approx\num{1.5}$)
 of this simulation run. The next two columns represent the instantaneous
@@ -1926,11 +1936,11 @@ flow state at this low Reynolds number is dominated by viscosity and should
 therefore recover the analytical solution for laminar Taylor-Couette flow. The
 torque Nusselt number is defined as the actual torque normalised by the torque of
 the laminar flow state (See % \S\ref{sec:tc} and
-\eg \cite{Brauckmann2016} around page \num{426} for further details). 
-Therefore, our torque results compare favourably with theoretical predictions. 
-\par More can be seen by making a simple time series plot using \eg 
-\gnuplot. In this tutorial case directory you can find a ready-to-use 
-script to generate the plot shown in figure \ref{fig:tc0040torque} by simply 
+\eg \cite{Brauckmann2016} around page \num{426} for further details).
+Therefore, our torque results compare favourably with theoretical predictions.
+\par More can be seen by making a simple time series plot using \eg
+\gnuplot. In this tutorial case directory you can find a ready-to-use
+script to generate the plot shown in figure \ref{fig:tc0040torque} by simply
 typing
 \begin{lstlisting}[language=bash]
 feldmann@darkstar:~/nsCouette/tc0040$ gnuplot torque.gpl
@@ -1951,17 +1961,17 @@ number, which relates the actual torque to the torque of the laminar
 Taylor-Couette analytical solution.}
 \label{fig:tc0040torque}
 \end{figure}
-We see that the inner and outer torque values both monotonically converge to the 
-theoretically predicted value of one after roughly $\orderof\left(1\right)$ 
-viscous time units. This again makes total sense, since this is approximately 
-the time span it should take for the presence of the driving inner wall to 
-propagated to the opposing wall (at a distance $d=1$) solely by the action of 
+We see that the inner and outer torque values both monotonically converge to the
+theoretically predicted value of one after roughly $\orderof\left(1\right)$
+viscous time units. This again makes total sense, since this is approximately
+the time span it should take for the presence of the driving inner wall to
+propagated to the opposing wall (at a distance $d=1$) solely by the action of
 viscosity. % and take effect everywhere in the flow domain.
 \par
-Next, we take a 
-look at the time series output of the velocity vector at some particular probe 
-locations in the flow field, which will give us more local insights into the 
-flow, where the torque provided us with rather global informations. By simply 
+Next, we take a
+look at the time series output of the velocity vector at some particular probe
+locations in the flow field, which will give us more local insights into the
+flow, where the torque provided us with rather global informations. By simply
 typing
 \begin{lstlisting}[language=bash]
 feldmann@darkstar:~/nsCouette/tc0040$ gnuplot probes.gpl
@@ -1971,25 +1981,25 @@ we generate a plot as shown in figure \ref{fig:tc0040probes}.
 \begin{figure}[htb]
 \centering
 \includegraphics[scale=1.00]{figures/tc0040/probes}
-\caption{Temporal evolution of the velocity components at individual probe 
+\caption{Temporal evolution of the velocity components at individual probe
 locations in our first Taylor-Couette tutorial \code{tc0040} with $\Rei=\num{50}$.
-The streamwise velocity component ($u_{\theta}$) is shown 
-at three different radial locations ($r_{i}\le r\le r_{o}$) and converges 
+The streamwise velocity component ($u_{\theta}$) is shown
+at three different radial locations ($r_{i}\le r\le r_{o}$) and converges
 everywhere to the theoretically predicted values (left). The absolute value of
 the two cross-stream components ($|u_r|$ and $|u_z|$) is shown exemplarily at
 one radial location ($r=\num{7.0}$).}
 \label{fig:tc0040probes}
 \end{figure}
-We can easily see that the streamwise (azimuthal) velocity component 
-($u_{\theta}$) converges nicely to the theoretically predicted values everywhere 
-in the flow domain ($r_{i}\le r\le r_{o}$). As expected, both cross-stream 
-velocity components ($|u_r|$ and $|u_z|$) decay to zero. The initial finite 
-amplitude perturbations which we imposed do not survive in the linearly sable 
-regime and the analytical solution for laminar Taylor-Couette flow is nicely 
-reproduced/recovered. Information about the analytical Taylor-Couette solution can be 
+We can easily see that the streamwise (azimuthal) velocity component
+($u_{\theta}$) converges nicely to the theoretically predicted values everywhere
+in the flow domain ($r_{i}\le r\le r_{o}$). As expected, both cross-stream
+velocity components ($|u_r|$ and $|u_z|$) decay to zero. The initial finite
+amplitude perturbations which we imposed do not survive in the linearly sable
+regime and the analytical solution for laminar Taylor-Couette flow is nicely
+reproduced/recovered. Information about the analytical Taylor-Couette solution can be
 found in the \code{probes.gpl} file by typing \eg
 \begin{lstlisting}[language=Gnuplot]
-sed -n '18, 33 p' probes.gpl 
+sed -n '18, 33 p' probes.gpl
 
 # Taylor-Couette set-up
 Re_i = 50.0 # inner cylinder Reynolds number
@@ -2007,9 +2017,9 @@ utc1 = c1*r1 + c2/r1  # Taylor-Couette analytical velocity
 utc2 = c1*r2 + c2/r2  # Taylor-Couette analytical velocity
 utc3 = c1*r3 + c2/r3  # Taylor-Couette analytical velocity
 \end{lstlisting}
-or \eg in \cite{Shi2015} on page \num{5} and in \cite{Brauckmann2016} around 
-page \num{424}. The particular radial probe locations for which the analytical 
-solution is needed to produce figure \ref{fig:tc0040probes}, can be found in the 
+or \eg in \cite{Shi2015} on page \num{5} and in \cite{Brauckmann2016} around
+page \num{424}. The particular radial probe locations for which the analytical
+solution is needed to produce figure \ref{fig:tc0040probes}, can be found in the
 header of the \code{probe0*.dat} files by typing
 \begin{lstlisting}[language=bash]
 feldmann@darkstar:~/nsCouette/tc0040$ head -n 10 probe01.dat
@@ -2017,15 +2027,15 @@ feldmann@darkstar:~/nsCouette/tc0040$ head -n 10 probe01.dat
 # Radial location n_r = 00005 n_rp = 0005 r =  6.741192272578147E+00
 # Azimuthal location n_th = 00003 th =  2.617993877991494E-01
 # Axial location n_z = 00003 z =  6.000000000000010E-01
-# Time, u_r, u_th, u_z 
+# Time, u_r, u_th, u_z
 9.9900000000000E-004  4.9755347543047E-002 -5.0697872196875E-001  -3.9262289916098E-001
 2.1090000000000E-003  4.9251475018859E-002  2.0445331579843E-003  -3.7513595580142E-001
 3.2190000000000E-003  4.8415330734597E-002  1.4934842744334E+000  -3.5808738661681E-001
 4.3290000000000E-003  4.7373835221887E-002  3.3163726265500E+000  -3.4181516483879E-001
 5.4390000000000E-003  4.6167965547437E-002  5.1781059897116E+000  -3.2637614051804E-001
 \end{lstlisting}
-In case you are interested in time series data at different probe locations, you 
-can modify the coordinates and the sampling rate in the parameter file using 
+In case you are interested in time series data at different probe locations, you
+can modify the coordinates and the sampling rate in the parameter file using
 your favourite text editor
 \begin{lstlisting}[language=Fortran]
 feldmann@darkstar:~/nsCouette/tc0040$ vi nsCouette.in
@@ -2095,7 +2105,7 @@ u_{r}\\ u_{\theta}\\u_{z}
 \begin{bmatrix}
 0\\ f(r)\\0
 \end{bmatrix}
-\text{,} 
+\text{,}
 \end{align}
 which is obviously invariant with respect to the azimuth $\theta$ and the axial
 location $z$. It only varies with respect to the wall-normal location $r$ and
@@ -2111,7 +2121,7 @@ section~\ref{sec:paraview} or section~\ref{sec:visit}, in case you prefer the so
 Last but not least we want to have a look at the time series data for the
 kinetic energy. The two files \code{ke\_th} and \code{ke\_z} provide integral
 kinetic energies for each discrete Fourier mode ($n_{\theta}$ and $l_{z}$,
-respectively) at each time step. So in our case, both files contain six
+respectively) at each timestep. So in our case, both files contain six
 columns of time series data: the  first one being the physical time $t$ and
 the next five being the integral kinetic energy in mode number
 $\num{0}\le n_{\theta}\le N=\num{4}$ and $\num{0}\le l_{z}\le L=\num{4}$,
@@ -2128,17 +2138,17 @@ we generate a plot as shown in figure~\ref{fig:tc0040keThZ}.
 \begin{figure}[htb]
 \centering
 \includegraphics[scale=1.00]{figures/tc0040/keThZ.pdf}
-\caption{Temporal evolution of the azimuthally (left) and axially (right) 
+\caption{Temporal evolution of the azimuthally (left) and axially (right)
 dependent kinetic energy contained in each discrete azimuthal ($n_{\theta}$)
 and axial ($l_{z}$) mode for our first Taylor-Couette tutorial \code{tc0040}
-with $\Rei=\num{50}$. See also page 3 in \cite{Shi2015} for definitions and 
-details on the spatial discretisation scheme of \nsc. As expected, the non-zero 
-kinetic energy introduced by the finite amplitude perturbation in the initial 
-velocity field decays monotonically to practically zero in all modes and never 
+with $\Rei=\num{50}$. See also page 3 in \cite{Shi2015} for definitions and
+details on the spatial discretisation scheme of \nsc. As expected, the non-zero
+kinetic energy introduced by the finite amplitude perturbation in the initial
+velocity field decays monotonically to practically zero in all modes and never
 increases again.}
 \label{fig:tc0040keThZ}
 \end{figure}
-Since there is no relevant energy content in any of the modes larger than the zero 
+Since there is no relevant energy content in any of the modes larger than the zero
 mode (which represents the mean value in the respective direction), there is no
 variation of the flow field neither in $\theta$ nor in $z$ direction. And there is
 obviously also no periodic or chaotic variation with respect to time at this low
@@ -2147,7 +2157,7 @@ zero. The amount of energy introduced to the initial conditions by the finite am
 perturbations is monotonically damped out by the dominating effect of viscosity and it
 never increases again. You can easily double-check this for larger times by simply
 restarting (Section \ref{sec:checkpoint}) the simulation and let it run for another
-\num{8000} or more time steps. Although the dynamics at this low Reynolds number is
+\num{8000} or more timesteps. Although the dynamics at this low Reynolds number is
 rather boring and also trivial as well as expected, these per mode energies are a
 very convenient and important measure to track and analyse the dynamical behaviour
 of the Taylor-Couette system in general. However, have in mind, that for more
@@ -2156,31 +2166,24 @@ files progressively become huge and are not so easy to handle anymore. One optio
 could be to increase the sampling frequency for these specific output. This can be done
 using the respective keyword in the namelist \code{parameters\_output} in the parameter input file.
 \begin{lstlisting}[language=fortran]
-feldmann@darkstar:~/nsCouette/tc0040$ vi nsCouette.in  
+feldmann@darkstar:~/nsCouette/tc0040$ vi nsCouette.in
 &parameters_output
-dn_ke = 1000   ! Time step output interval for modal kinetic energy
+dn_ke = 1000   ! timestep output interval for modal kinetic energy
 /
 \end{lstlisting}
 Additionally, the highest wave numbers represent the spatial resolution
-of the simulation, \mod{see section~\ref{sec:spatialDiscretisation}}. Plots
+of the simulation, see section~\ref{sec:spatialDiscretisation}. Plots
 like these in figures~\ref{fig:tc0040keThZ}, \ref{fig:tc0041keThZ} and
-\ref{fig:tc0042keThZ} become very handy as a first indicator for the quality of the spatial resolution. \mod{To
+\ref{fig:tc0042keThZ} become very handy as a first indicator for the quality
+of the spatial resolution. To
 resolve all relevant flow scales, the trailing coefficients of the
 spectral expansions should be smaller than the leading coefficients
-by at least four or five orders of magnitude.} Here, the highest wave
+by at least four or five orders of magnitude. Here, the highest wave
 numbers only show numerical noise at a very low level
 ($\orderof\left(\num{e-30}\right)$) but no physically relevant energy
 content. Hence, the spatial resolution in $\theta$ in $z$ direction can
 be considered as sufficient.
 
-% Plots like these in figures~\ref{fig:tc0040keThZ}, \ref{fig:tc0040keThZ} and
-% \ref{fig:tc0040keThZ}
-% become very handy as an indicator
-% for the quality of the spatial resolution. Although the details very much depend on
-% what exactly you are intending to do, as a rough rule the energy should decay
-% at least several (five, six, seven \dots) orders of magnitude from the lowest to the
-% highest wave number (at all times in the simulation) to consider the spatial resolution
-% as sufficient. 
 
 
 \subsection{Taylor-vortex flow}
@@ -2218,15 +2221,15 @@ m_z0 =  8   ! L axial Fourier modes
 This choice corresponds to a total of $n_r \times n_\theta  \times n_z=M \times
 (2N+1) \times (2L+1) = \num{24} \times \num{9} \times \num{17}$ significant
 physical grid points. The finer spatial resolution naturally demands a smaller
-computational time step $\Delta t$. Since $\Delta t$ will be adapted automatically
+computational timestep $\Delta t$. Since $\Delta t$ will be adapted automatically
 to ensure numerical stability during integration, we simply have to increase the
-total number of time steps in namelist \code{parameters\_timestep}, to end up at
+total number of timesteps in namelist \code{parameters\_timestep}, to end up at
 roughly the same physical time $t$ as in our first tutorial case
 (Section~\ref{sec:tc0040}).
 \begin{lstlisting}[language=Fortran]
 &parameters_timestep
-numsteps    = 22000   ! Number of computational time steps
-variable_dt = T       ! Use variable (T) or fixed (F) time step size
+numsteps    = 22000   ! Number of computational timesteps
+variable_dt = T       ! Use variable (T) or fixed (F) timestep size
 /
 \end{lstlisting}
 Both changes will
@@ -2249,7 +2252,7 @@ To run this tutorial, you now simply have to copy the same executable as before
 (Section~\ref{sec:tc0040}) to the new case directory and start the simulation by
 prompting the executable and passing the new parameter input file to the standard input.
 Further details and different ways to start a simulation can be found in
-section~\ref{sec:runningTheCode}. 
+section~\ref{sec:runningTheCode}.
 \begin{lstlisting}[language=bash]
 feldmann@darkstar:~/nsCouette/tc0041$ cp ../nscouette/darkstar/nsCouette.x .
 feldmann@darkstar:~/nsCouette/tc0041$ ./nsCouette.x < nsCouette.in
@@ -2259,12 +2262,12 @@ feldmann@darkstar:~/nsCouette/tc0041$ ./nsCouette.x < nsCouette.in
   step=       21000  dt=   6.6666666666666670E-005
  written hdf5/xdmf files to disk: fields_tc0041_00022000.{h5,xmf}
   step=       22000  dt=   6.6666666666666670E-005
- written coeff file to disk: coeff_tc0041.00022000                   
- written coeff file to disk: coeff_tc0041.00022000                   
+ written coeff file to disk: coeff_tc0041.00022000
+ written coeff file to disk: coeff_tc0041.00022000
 ------------------------------------------------------------------------------------
 Total number of timesteps: 00022000
 Total elapsed WCT:    26.96s
-Elapsed WCT per time step w/o coeff io (min, max, average):   0.0012s,    0.0012s,    0.0012s
+Elapsed WCT per timestep w/o coeff io (min, max, average):   0.0012s,    0.0012s,    0.0012s
 \end{lstlisting}
 Now \nsc runs on one single \mpi task and throws its log output directly
 to the terminal. You can watch the progress of the simulation step by step,
@@ -2272,7 +2275,7 @@ which should usually finish in less than a minute (Here after \SI{26.96}{\second
 \par
 Let's continue with first having a look at the final flow state.
 Figure~\ref{fig:tc0041vectorPlot} shows a three-dimensional representation
-of the instantaneous flow field at the last time step from our simulation run.
+of the instantaneous flow field at the last timestep from our simulation run.
 \begin{figure}
 \includegraphics[width=1.00\textwidth]{figures/tc0041/vectorPlot.png}
 \caption{Three-dimensional flow field visualisation using  \paraview.
@@ -2288,7 +2291,7 @@ forming toroidal vortices. As shown in figure~\ref{fig:tc0041vectorPlot},
 alternating regions of positive (red) and negative (blue) $u_r$ push high-speed
 fluid from the rotating inner cylinder towards the stationary outer cylinder;
 And Vice versa for low-speed fluid. This can be easily seen by the bent
-iso-surface (grey) representing the average streamwise velocity 
+iso-surface (grey) representing the average streamwise velocity
 ($u_{\theta}=\sfrac{\left(\Rei+\Reo\right)}{2}$) between the cylinders.
 To fulfil mass conservation, these regions are flanked by four alternating regions of
 axial up (green) and down (yellow) wash. This well-known phenomenon is a so-called
@@ -2297,7 +2300,7 @@ of the two cross-stream velocity components $u_{r}$ and $u_{z}$, which are also 
 in figure~\ref{fig:tc0041vectorPlot}. You can easily create such a plot with \paraview
 by loading the corresponding \code{*.h5} file (Section \ref{sec:iohdf5}), performing a
 coordinate transformation (Section \ref{sec:paraview}) and playing around with the
-\code{contour}, \code{slice} and \code{glyph} filters. Loading the provided state file 
+\code{contour}, \code{slice} and \code{glyph} filters. Loading the provided state file
 (\code{taylorVortexIsoContourVectorPlot.pvsm}) into \paraview might also be helpful to
 learn creating such plots.
 \par
@@ -2309,10 +2312,10 @@ time series of $u_{\theta}$ shown in figure~\ref{fig:tc0041probes}.
 \begin{figure}[htb]
 \centering
 \includegraphics[scale=1.00]{figures/tc0041/probes}
-\caption{Temporal evolution of the velocity components at individual probe 
+\caption{Temporal evolution of the velocity components at individual probe
 locations in our second Taylor-Couette tutorial \code{tc0041} with $\Rei=\num{150}$.
-The streamwise velocity component ($u_{\theta}$) is shown 
-at three different radial locations ($r_{i}\le r\le r_{o}$) and converges 
+The streamwise velocity component ($u_{\theta}$) is shown
+at three different radial locations ($r_{i}\le r\le r_{o}$) and converges
 everywhere to a constant value different from the theoretically predicted values for
 the simple Taylor-Couette flow state. The values of the two cross-stream components
 ($u_r$ and $u_z$) also converges to constant but non-zero value, as shown exemplarily
@@ -2341,16 +2344,16 @@ number, which relates the actual torque to the torque of the laminar
 Taylor-Couette analytical solution.}
 \label{fig:tc0041torque}
 \end{figure}
-\mod{Since momentum and energy must be conserved, a minimal requirement
+Since momentum and energy must be conserved, a minimal requirement
 for sufficient spatial resolution is that the torque at the inner cylinder
 matches that of the outer cylinder. The time series provided by \nsc and
 plots like figures~\ref{fig:tc0041torque} allow to easily monitor the
 evolution of these quantities and hence check this resolution requirement.
 It can be easily seen, that both torque values match very well. For a more
-quantitative analysis, an additionally python script is also provided 
+quantitative analysis, an additionally python script is also provided
 (\code{nsCouette/postprocessing/python}) to manipulate (plot, average,
-compare, etc) the torque time series. See also the thermal convection 
-tutorials~\ref{sec:tc0073}.}
+compare, etc) the torque time series. See also the thermal convection
+tutorials~\ref{sec:tc0073}.
 The plots shown in figures~\ref{fig:tc0041probes}, \ref{fig:tc0041torque},
 \ref{fig:tc0041keThZ} can be easily reproduced with the ready-to-use
 \gnuplot scripts provided in this tutorial.
@@ -2363,7 +2366,7 @@ feldmann@darkstar:~/nsCouette/tc0041$ okular probes.pdf torque.pdf keThZ.pdf &
 \begin{figure}[htb]
 \centering
 \includegraphics[scale=1.00]{figures/tc0041/keThZ.pdf}
-\caption{Temporal evolution of the azimuthally (left) and axially (right) 
+\caption{Temporal evolution of the azimuthally (left) and axially (right)
 dependent kinetic energy contained in each discrete azimuthal ($n_{\theta}$)
 and axial ($l_{z}$) mode for our second Taylor-Couette tutorial \code{tc0041}
 with $\Rei=\num{150}$.}
@@ -2388,10 +2391,10 @@ Taylor-Couette analytical solution.}
 \begin{figure}[htb]
 \centering
 \includegraphics[scale=1.00]{figures/tc0042/probes}
-\caption{Temporal evolution of the velocity components at individual probe 
+\caption{Temporal evolution of the velocity components at individual probe
 locations in our third Taylor-Couette tutorial \code{tc0042} with $\Rei=\num{458.1}$.
-The streamwise velocity component ($u_{\theta}$) is shown 
-at three different radial locations ($r_{i}\le r\le r_{o}$) and converges 
+The streamwise velocity component ($u_{\theta}$) is shown
+at three different radial locations ($r_{i}\le r\le r_{o}$) and converges
 everywhere to the theoretically predicted values (left). The absolute value of
 the two cross-stream components ($|u_r|$ and $|u_z|$) is shown exemplarily at
 one radial location ($r=\num{7.0}$).}
@@ -2400,13 +2403,13 @@ one radial location ($r=\num{7.0}$).}
 \begin{figure}[htb]
 \centering
 \includegraphics[scale=1.00]{figures/tc0042/keThZ.pdf}
-\caption{Temporal evolution of the azimuthally (left) and axially (right) 
+\caption{Temporal evolution of the azimuthally (left) and axially (right)
 dependent kinetic energy contained in each discrete azimuthal ($n_{\theta}$)
 and axial ($l_{z}$) mode for our third Taylor-Couette tutorial \code{tc0042}
-with $\Rei=\num{458.1}$. See also page 3 in \cite{Shi2015} for definitions and 
-details on the spatial discretisation scheme of \nsc. As expected, the non-zero 
-kinetic energy introduced by the finite amplitude perturbation in the initial 
-velocity field decays monotonically to practically zero in all modes and never 
+with $\Rei=\num{458.1}$. See also page 3 in \cite{Shi2015} for definitions and
+details on the spatial discretisation scheme of \nsc. As expected, the non-zero
+kinetic energy introduced by the finite amplitude perturbation in the initial
+velocity field decays monotonically to practically zero in all modes and never
 increases again.}
 \label{fig:tc0042keThZ}
 \end{figure}
@@ -2446,7 +2449,7 @@ cp -r ../nscouette/tutorials/tc0073 .
 cd tc0073
 vi nsCouette.in
 \end{lstlisting}
-and inspect the parameter file (\code{nsCouette.in}) using your favourite 
+and inspect the parameter file (\code{nsCouette.in}) using your favourite
 text editor.
 
 
@@ -2459,7 +2462,7 @@ gnuplot probeCompare.gpl
 gnuplot torqueCompare.gpl
 okular probeComapre torqueCompare.pdf &
 \end{lstlisting}
-and opening the generated \code{*.pdf} figures using your favourite document 
+and opening the generated \code{*.pdf} figures using your favourite document
 viewer (\eg \code{okular}, \code{evince}, \code{acroread} and alike).
 
 
@@ -2476,7 +2479,7 @@ vi nsCouette.in
 using your favourite text editor. Note, that we now have increased \Gr to \num{4000}
 and that we have also increased the axial resolution, since we expect a slightly more
 complex flow state. Moreover, we now want to run the simulation for another
-\num{400000} time steps (instead of \num{200000} as before) to end up with roughly
+\num{400000} timesteps (instead of \num{200000} as before) to end up with roughly
 the same physical time span, since we now expect a slightly smaller $\Delta t$ due to
 larger velocities and a finer grid resolution:
 \begin{lstlisting}[language=fortran]
@@ -2491,7 +2494,7 @@ Gr = 4000.0d0 ! Grashof number Gr = Ra/Pr [TE_CODE only]
 /
 &parameters_timestep
 ...
-numsteps = 400000   ! number of computational time steps
+numsteps = 400000   ! number of computational timesteps
 /
 &parameters_output
 ...
@@ -2500,7 +2503,7 @@ fBase_ic = 'tc0075' ! identifier for coeff_ (checkpoint) and fields_ (hdf5) file
 &parameters_control
 ...
 restart = 1   ! initial conditions, start from: 0=scratch, 1,2=checkpoint
-/  
+/
 \end{lstlisting}
 
 
@@ -2525,11 +2528,11 @@ fbase_ic = tc0075
 \end{lstlisting}
 using your favourite text editor.
 \par
-Figure~\ref{fig:compareGrass} summarises the results of three DNS with increasing 
+Figure~\ref{fig:compareGrass} summarises the results of three DNS with increasing
 temperature difference at a fixed rotation rate, using \nsc.
 \begin{figure}[htb]
 \centering
-\includegraphics[width=1.00\textwidth]{../paper/figures/3compareGr.pdf}
+\includegraphics[width=1.00\textwidth]{figures/compareGr.pdf}
 \caption{Different flow states for increasing Grass number when restarted
 the simulation from a former run. Temporal evolution of the torque at the inner
 cylinder wall and the streamwise (azimuthal) velocity component at one mid-gap
@@ -2540,42 +2543,42 @@ inwards (blue) and outwards (red) directed wall-normal (radial) velocity compone
 Scripts (\gnuplot) and state files (\paraview) to create the shown plots
 are provided in the tutorial case directories.
 \par
-The first DNS was initialized by applying small single harmonic disturbances to 
-the basic state at $\Rei=\num{50}$ and $\Rayleigh=\num{2130}$. 
-Fig.~\ref{fig:compareGrass}a shows that initially $\Nui\approx\num{1}$, 
-corresponding to purely conductive heat transfer. However, after roughly two 
-viscous time units, a sharp increase of \Nui is observed, indicating that the 
-basic state has become unstable. This is confirmed by the time-series of 
-$u_{\theta}$ at a fixed mid-gap probe location in the computational domain, see 
-Fig.~\ref{fig:compareGrass}b. The final state of this run 
-($t\approx\num{3.5}\sfrac{d^2}{\nu}$) is visualized in 
-Fig.~\ref{fig:compareGrass}c, which shows a three-dimensional rendering of a 
-$T=0$ iso-surface generated with \code{ParaView}. The temperature surface is 
-color-coded by inward/outward (blue/red) facing values of the wall-normal 
-velocity component $u_r$. By saving several snapshots, a movie can be easily 
-produced, which reveals a spiral flow pattern rotating at a constant speed 
-like a barber pole. This explains why the $u_{\theta}$ signal reaches a state 
-where it is periodic in time: the spiral pattern passes repeatedly through the 
-probe location at which the velocity is recorded without changing its shape. 
-This also explains why the integral heat flux (\Nui) remains constant. The 
-second and third DNS were initialized with the final state of the former runs 
+The first DNS was initialized by applying small single harmonic disturbances to
+the basic state at $\Rei=\num{50}$ and $\Rayleigh=\num{2130}$.
+Fig.~\ref{fig:compareGrass}a shows that initially $\Nui\approx\num{1}$,
+corresponding to purely conductive heat transfer. However, after roughly two
+viscous time units, a sharp increase of \Nui is observed, indicating that the
+basic state has become unstable. This is confirmed by the time-series of
+$u_{\theta}$ at a fixed mid-gap probe location in the computational domain, see
+Fig.~\ref{fig:compareGrass}b. The final state of this run
+($t\approx\num{3.5}\sfrac{d^2}{\nu}$) is visualized in
+Fig.~\ref{fig:compareGrass}c, which shows a three-dimensional rendering of a
+$T=0$ iso-surface generated with \code{ParaView}. The temperature surface is
+color-coded by inward/outward (blue/red) facing values of the wall-normal
+velocity component $u_r$. By saving several snapshots, a movie can be easily
+produced, which reveals a spiral flow pattern rotating at a constant speed
+like a barber pole. This explains why the $u_{\theta}$ signal reaches a state
+where it is periodic in time: the spiral pattern passes repeatedly through the
+probe location at which the velocity is recorded without changing its shape.
+This also explains why the integral heat flux (\Nui) remains constant. The
+second and third DNS were initialized with the final state of the former runs
 and by increasing the Rayleigh number to $\Rayleigh=\num{2840}$ and \num{3550},
 respectively. The time series and the final states of these runs are also
 shown in Fig.~\ref{fig:compareGrass}. They reveal that the flow state undergoes a
 sequence of transitions to different flow states with increasing
 spatio-temporal complexity as \Rayleigh increases.
 \par
-\mod{As already mentioned in the tutorials before (e.g. \ref{sec:tc0041}),
+As already mentioned in the tutorials before (e.g. \ref{sec:tc0041}),
 the time series output of the modal kinetic energy (figures~\ref{fig:tc0040keThZ},
 \ref{fig:tc0041keThZ}, and \ref{fig:tc0042keThZ}) can be used to check the
-spatial resolution of a simulation. Another minimal/necessary requirement 
+spatial resolution of a simulation. Another minimal/necessary requirement
 for sufficient spatial resolution is that the torque at the inner cylinder
 matches that of the outer cylinder. The same holds for the Nusselt number.
 This is because momentum and energy must be conserved in the system.
 The time series provided by \nsc allow to easily monitor the
 evolution of these quantities and hence check this resolution requirement.
 For a quantitative analysis, a python script is provided average, plot and
-compare the torque time series, see figure~\ref{fig:tc0076torqueNusseltCompare}.}
+compare the torque time series, see figure~\ref{fig:tc0076torqueNusseltCompare}.
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.49\textwidth]{figures/tc0076/torque.pdf}
@@ -2588,7 +2591,7 @@ to reproduce such plots are shipped with the code.}
 \label{fig:tc0076torqueNusseltCompare}
 \end{figure}
 \begin{lstlisting}[language=bash]
-feldmann@fsmcluster:~/nsCouette/tc0076$ python torque.py  
+feldmann@fsmcluster:~/nsCouette/tc0076$ python torque.py
 Read time series data from file torque
 Data from t = 7.3975195320694 to t = 12.97130416704
 Temporal averaging from ta0 = 10.000006327682  to ta1 = 12.97130416704
@@ -2596,8 +2599,8 @@ Averaged inner torque <ti>_ta = 1.2710938766304294
 Averaged outer torque <to>_ta = 1.2731075611260696
 Absolute torque difference  o-i    =  0.002013684495640211
 Relative torque difference (o-i)/o =  0.0015842138276822885
-Written file torque.pdf   
-feldmann@fsmcluster:~/nsCouette/tc0076$ python Nusselt.py  
+Written file torque.pdf
+feldmann@fsmcluster:~/nsCouette/tc0076$ python Nusselt.py
 Read time series data from file Nusselt
 Data from t = 7.3975195320694 to t = 12.97130416704
 Temporal averaging from ta0 = 10.000006327682  to ta1 = 12.97130416704
@@ -2606,7 +2609,7 @@ Averaged outer torque <to>_ta = 1.1476308708970335
 Absolute torque difference  o-i    =  0.00014721864236566518
 Relative torque difference (o-i)/o =  0.00012829694094238135
 Written file Nusselt.pdf
-feldmann@fsmcluster:~/nsCouette/tc0076$ 
+feldmann@fsmcluster:~/nsCouette/tc0076$
 \end{lstlisting}
 
 
@@ -2617,7 +2620,7 @@ feldmann@fsmcluster:~/nsCouette/tc0076$
 
 
 \begin{enumerate}
-\item 
+\item
 \begin{itemize}
 \item[Q:] How do I compile the code for multiple processors?
 \item[A:] There is no special compile-time-option (Section~\ref{sec:compileTimeOptions}) to
@@ -2625,7 +2628,7 @@ generate such things like a serial or parallel executable. The number of process
 freely be selected at \textit{runtime}, as described in the section~\ref{sec:runningTheCode}.
 \end{itemize}
 
-\item 
+\item
 \begin{itemize}
 \item[Q:] Why?
 \item[A:] Because!
@@ -2669,8 +2672,8 @@ COMPLEX(KIND=8),PARAMETER :: ii = DCMPLX(0,1) ! Complex i = sqrt(-1)
 !--- Spectral parameters
 INTEGER(KIND=4),PARAMETER :: m_r  = 32  ! Maximum spectral mode (> n_s-1)
 INTEGER(KIND=4),PARAMETER :: m_th = 16  ! Number of Fourier modes
-INTEGER(KIND=4),PARAMETER :: m_z0 = 16 
-INTEGER(KIND=4),PARAMETER :: m_z = 2*m_z0 
+INTEGER(KIND=4),PARAMETER :: m_z0 = 16
+INTEGER(KIND=4),PARAMETER :: m_z = 2*m_z0
 INTEGER(KIND=4),PARAMETER :: m_f  = (m_th+1)*m_z ! Total number of Fourier modes
 REAL(KIND=8)   ,PARAMETER :: k_th0= 6.D0   ! Minimum azimuthal wavenumber
 REAL(KIND=8)   ,PARAMETER :: k_z0 = 2*PI/2.4  ! Minimum axial wavenumber
@@ -2711,7 +2714,7 @@ REAL(KIND=8) :: Courant = 0.25d0
 INTEGER(KIND=4) :: print_time_screen = 250
 LOGICAL   :: variable_dt= .true.
 REAL(kind=8) :: maxdt = 0.01d0
-INTEGER(KIND=4) :: numsteps = 100000 ! Number of time steps
+INTEGER(KIND=4) :: numsteps = 100000 ! Number of timesteps
 INTEGER(KIND=4) :: dn_coeff = 5000   ! Output coefficients every nth step
 INTEGER(KIND=4) :: dn_ke = 100 ! Output energy every nth step
 INTEGER(KIND=4) :: dn_vel = 100   ! Output velocity every nth step
@@ -2721,7 +2724,7 @@ INTEGER(KIND=4) :: dn_hdf5 = 1000 ! Output HDF5 every nth step
 
 
 
- 
+
 
 
 
@@ -2754,7 +2757,7 @@ for installing \hdf, as described in section~\ref{sec:buildhdf}
 # needed for HDF5, which is needed for NetCDF with netcdf-4 capabilities.
 #
 # Daniel Feldmann, 18th January 2017
-# 
+#
 # Download and unpack to some directory of your choice, \eg ~/zlib/build
 tar xfvz zlib-1.2.11.tar.gz
 cd zlib-1.2.11/
@@ -2777,9 +2780,9 @@ mpiicc --version
 export CC=mpiicc
 export CFLAGS="-O3 -xHost -ip -mcmodel=medium"
 #
-# Configure zlib to be installed into some place of you wish, \eg as follows 
+# Configure zlib to be installed into some place of you wish, \eg as follows
 mkdir ~/zlib/zlib-1.2.11
-./configure --prefix=/home/feldmann/zlib/zlib-1.2.11 
+./configure --prefix=/home/feldmann/zlib/zlib-1.2.11
 #
 # Build, test and install zlib via
 make
@@ -2794,7 +2797,7 @@ unset CFLAGS
 # LD_LIBRARY_PATH environment variable if that lib directory is not searched by
 # default. \eg put the following line to your ~/.bashrc
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/feldmann/zlib/zlib-1.2.11/lib
-# 
+#
 # Done!
 \end{lstlisting}
 
@@ -2807,7 +2810,7 @@ for installing \hdf, as described in section~\ref{sec:buildhdf}
 # needed for HDF5, which is needed for NetCDF with netcdf-4 capabilities.
 #
 # Daniel Feldmann, 6th January 2017
-# 
+#
 tar xfvz zlib-1.2.11.tar.gz
 cd zlib-1.2.11/
 #
@@ -2827,7 +2830,7 @@ mpicc --version
 export CC=mpicc
 export CFLAGS='-O3 -mcmodel=medium'
 #
-# Configure zlib to be installed into some place you wish, \eg as follows 
+# Configure zlib to be installed into some place you wish, \eg as follows
 mkdir ~/zlib/zlib-1.2.11
 ./configure --prefix=~/zlib/zlib-1.2.11
 #
@@ -2844,7 +2847,7 @@ unset CFLAGS
 # LD_LIBRARY_PATH environment variable if that lib directory is not searched by
 # default. \eg put the following line to your ~/.bashrc
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/feldmann/zlib/zlib-1.2.11/lib
-# 
+#
 # Done!
 \end{lstlisting}
 
@@ -2858,9 +2861,9 @@ libraries with \fortran interfaces on our local \code{fsmcluster} at the
 a \code{zlib} installation, as described in section~\ref{sec:buildzlib}
 
 \begin{lstlisting}[language=bash]
-# 
+#
 # Download and unpack to some directory of your choice, \eg ~/hdf5/build/.
-tar xvf hdf5-1.10.0-patch1.tar 
+tar xvf hdf5-1.10.0-patch1.tar
 cd hdf5-1.10.0-patch1
 #
 # Load Intel compiler suite
@@ -2904,7 +2907,7 @@ make install
 # During building a lot of warnings come up like 'non-pointer conversion from
 # "int" to "char" may lose significant bits' Absolutely no idea if this might
 # be a problem...
-# 
+#
 # Do not forget to unset environment varibles, what might mess up future builds
 unset CC CPP FC
 unset CFLAGS FCFLAGS CPPFLAGS LDFLAGS LIBS
@@ -2913,7 +2916,7 @@ unset CFLAGS FCFLAGS CPPFLAGS LDFLAGS LIBS
 # LD_LIBRARY_PATH environment variable if that lib directory is not searched by
 # default. \eg put the following line to your ~/.bashrc
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/feldmann/hdf5/hdf5-1.10.0-patch1/lib
-# 
+#
 # Done!
 \end{lstlisting}
 
@@ -2928,7 +2931,7 @@ section~\ref{sec:buildzlib}
 # HDF5 is also required for NetCDF with netcdf-4 capabilities.
 #
 # Daniel Feldmann, 6th February 2017
-# 
+#
 # 1. Download and unpack to some directory of your choice, \eg ~/hdf5/build/.
 tar xvf hdf5-1.10.0-patch1.tar
 cd hdf5-1.10.0-patch1
@@ -2985,7 +2988,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/feldmann/hdf5/hdf5-1.10.0-patch1/l
 \section{Code variant for pipe flow (\nsp)}
 \label{sec:nsPipe}
 
-\mod{The code \nsp merges the numerical formulation of \opf~\cite{Willis2017}, an
+The code \nsp merges the numerical formulation of \opf~\cite{Willis2017}, an
 open source code to simulate pipe flow, with the hybrid parallel strategy of \nsc,
 creating a highly scalable solver to simulate pipe flow at large values of the
 Reynolds number. The source code structure of \nsp was conceived to follow that of
@@ -2996,15 +2999,15 @@ steps described in section~\ref{sec:buildingTheCode}. Note, however, that the
 executable obtained after compilation is in this case named \code{nsPipeFlow.x}.
 Also from a user perspective, \nsp works in the same way as \nsc, and so the reader
 is encouraged to read in detail all sections in this user guide and, in particular,
-follow the tutorials in section~\ref{sec:tutorials}, before using \nsp.}
+follow the tutorials in section~\ref{sec:tutorials}, before using \nsp.
 \par
-\mod{Here, we will only briefly discuss those details that are specific to \nsp,
-with emphasis placed on I/O parameters or operations that differ with respect to \nsc.}
+Here, we will only briefly discuss those details that are specific to \nsp,
+with emphasis placed on I/O parameters or operations that differ with respect to \nsc.
 
 \subsection{Governing equations and parameters}
 \label{sec:nspGoverningEquations}
 
-\mod{We consider a fluid flowing through a straight circular pipe of constant
+We consider a fluid flowing through a straight circular pipe of constant
 cross section. Fluid motion is governed by the Navier-Stokes and continuity
 equations in cylindrical coordinates (eq.~\ref{eq:eq_pipe}). These are rendered
 dimensionaless by choosing the pipe radius ($R$), the centreline velocity of
@@ -3027,24 +3030,24 @@ can be made at $Re \approx 1850$ where localized turbulent patches known as puff
 transiently. Other complex spatio-temporal dynamics such as puff splitting and
 turbulence spreading (``slugs'') are observed as $Re$ increases during the
 so called transitional regime ($2050 \lesssim Re \lesssim 2800$). Persistent
-space filling turbulence occurs eventually at $Re \gtrsim 3000$.}
+space filling turbulence occurs eventually at $Re \gtrsim 3000$.
 \par
-\mod{The term $F\hat{e}_z$ in eq.~\eqref{eq:eq_pipe} denotes the volumetric
+The term $F\hat{e}_z$ in eq.~\eqref{eq:eq_pipe} denotes the volumetric
 force driving the fluid motion. There are two ways to drive motion in pipes.
 \begin{enumerate}
 \item Pressure driven flow. A constant pressure gradient between inlet and outlet
 is imposed. Under this condition the wall shear stress is fixed but the
 bulk (average) velocity and therefore the Reynolds number
-will change throuhout the simulation. 
+will change throuhout the simulation.
 \item Flow rate driven flow. A constant flow rate is imposed,
 \ie the bulk velocity is constant. Under this condition the Reynolds number
 is constant but the wall shear stress will fluctuate.
 \end{enumerate}
-Both approaches are implemented in \nsp.}
+Both approaches are implemented in \nsp.
 
 \subsection{Boundary conditions}
 \label{subsec:bcpipe}
-\color{red}
+
 Equations~\eqref{eq:eq_pipe} require of boundary conditions to be solved. In \nsp,
 periodic boundary conditions are imposed for both velocity and pressure in the streamwise
 and azimuthal directions. In the radial direction boundary conditions have to be imposed
@@ -3075,7 +3078,7 @@ boundary condition using an influence matrix technique.
 
 \subsection{Input file}
 \label{subsec:input_nspipe}
-\color{red}
+
 As in \nsc the simulation control parameters are defined in an input file named
 \code{nsPipe.in}, which is read from the standard input in the initial stage of
 the simulation. See also sections~\ref{sec:parameterInputFile} for further details.
@@ -3159,7 +3162,7 @@ This functionality will however be added in future releases.
 
 \subsection{Initial condition}
 \label{subsec:initial_condition_pipe}
-\color{red}
+
 As explained in section~\ref{sec:initialConditions} there exist three options to start
 the simulation and these can be specified in the input file using the \code{restart} parameter.
 When the initilization option \code{restart=0} is chosen, the simulation is started from
@@ -3186,7 +3189,7 @@ code must be subsequently compiled.
 
 \section{Useful notes to start working with \code{git}}
 \label{app:git}
-\color{black}
+
 Say you work on a branch called \code{myBranch} to implement your own stuff to \nsc.
 While you are working, the \code{master} branch or any other branch has been changed
 by you or by any other developer. Say a bug was fixed in another part of the code.
