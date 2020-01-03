@@ -8,7 +8,7 @@ The source code can be easily downloaded from our git repository. Please read th
 
 ```
 # Download the repository
-git clone https://github.com/dfeldmann/nsCouette
+git clone https://github.com/dfeldmann/nsCouette.git
 cd nsCouette
 ls doc
 ```
