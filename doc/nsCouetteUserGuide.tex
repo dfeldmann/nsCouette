@@ -59,7 +59,7 @@ own research project.
 
 Basically, downloading, building, and running the code goes as easy as this:
 \begin{lstlisting}[language=bash]
-git clone https://github.com/dfeldmann/nsCouette
+git clone https://github.com/dfeldmann/nsCouette.git
 make ARCH=make.arch.gcc-linux HDF5IO=no
 export OMP_NUM_THREADS=4
 mpiexec -np 2 ./nsCouette.x < nsCouette.in
@@ -407,7 +407,7 @@ it can be installed using your favourite software package manager.
 \begin{lstlisting}[language=bash]
 feldmann@darkstar:~/nsCouette$ sudo apt-get install git
 ...
-feldmann@darkstar:~/nsCouette$ git clone https://github.com/dfeldmann/nsCouette
+feldmann@darkstar:~/nsCouette$ git clone https://github.com/dfeldmann/nsCouette.git
 feldmann@darkstar:~/nsCouette$ cd nsCouette
 feldmann@darkstar:~/nsCouette/nsCouette$ git checkout nsCouette-1.0
 feldmann@darkstar:~/nsCouette/nsCouette$ git checkout nsCouette-gpu
